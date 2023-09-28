@@ -47,39 +47,65 @@ import {
   StandardPolicyListRevision,
   PolicyListRevision,
   PolicyListEditor,
+  InternedInstanceFactory,
 } from 'brokkr';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { BotSDKPolicyListEditor } from './PolicyListEditor';
 
 export class BotSDKPolicyListManager implements PolicyListManager {
-  // TOOD: you know, it would be good to have a generic singleton tracker type
-  // that accepted a create thunk.
-  // it would be less error prone too.
-  private readonly issuedLists: Map<
+  private readonly issuedLists: InternedInstanceFactory<
     string /*room id*/,
-    PolicyListRevisionIssuer
-  > = new Map();
+    PolicyListRevisionIssuer,
+    [MatrixRoomID]
+  >;
 
-  private readonly issuedEditors: Map<string /*room id*/, PolicyListEditor> =
-    new Map();
+  private readonly issuedEditors: InternedInstanceFactory<
+    string /*room id*/,
+    PolicyListEditor,
+    [MatrixRoomID]
+  >;
 
   constructor(private readonly client: MatrixSendClient) {
-    // nothing to do.
+    this.issuedLists = new InternedInstanceFactory<
+      string /*room id*/,
+      PolicyListRevisionIssuer,
+      [MatrixRoomID]
+    >(
+      async (
+        _key: string,
+        room: MatrixRoomID
+      ): Promise<ActionResult<PolicyListRevisionIssuer>> => {
+        const initialRevisionResult = await this.getInitialPolicyListRevision(
+          room
+        );
+        if (isError(initialRevisionResult)) {
+          return initialRevisionResult;
+        }
+        const issuer = new StandardPolicyListRevisionIssuer(
+          room,
+          initialRevisionResult.ok,
+          this
+        );
+        return Ok(issuer);
+      }
+    );
+    this.issuedEditors = new InternedInstanceFactory<
+      string /*room id*/,
+      PolicyListEditor,
+      [MatrixRoomID]
+    >(async (roomId: string, room: MatrixRoomID) => {
+      const issuer = await this.getListRevisionIssuer(room);
+      if (isError(issuer)) {
+        return issuer;
+      }
+      const editor = new BotSDKPolicyListEditor(this.client, room, issuer.ok);
+      return Ok(editor);
+    });
   }
   public async getListEditor(
     room: MatrixRoomID
   ): Promise<ActionResult<PolicyListEditor>> {
-    const existingEditor = this.issuedEditors.get(room.toRoomIdOrAlias());
-    if (existingEditor !== undefined) {
-      return Ok(existingEditor);
-    }
-    const issuer = await this.getListRevisionIssuer(room);
-    if (isError(issuer)) {
-      return issuer;
-    }
-    const editor = new BotSDKPolicyListEditor(this.client, room, issuer.ok);
-    this.issuedEditors.set(room.toRoomIdOrAlias(), editor);
-    return Ok(editor);
+    return await this.issuedEditors.getInstance(room.toRoomIdOrAlias(), room);
   }
 
   public async createList(
@@ -170,30 +196,7 @@ export class BotSDKPolicyListManager implements PolicyListManager {
   public async getListRevisionIssuer(
     room: MatrixRoomID
   ): Promise<ActionResult<PolicyListRevisionIssuer>> {
-    const revisionIssuer = this.issuedLists.get(room.toRoomIdOrAlias());
-    if (revisionIssuer === undefined) {
-      // then intern the list
-      const initialRevisionResult = await this.getInitialPolicyListRevision(
-        room
-      );
-      if (isError(initialRevisionResult)) {
-        return initialRevisionResult;
-      }
-      const issuer = new StandardPolicyListRevisionIssuer(
-        room,
-        initialRevisionResult.ok,
-        this
-      );
-      // FIXME: there is potential for race if the same list is asked for in two places
-      // very bad please fix with an await lock.
-      // could also be fixed by populating with the blank revision first and then
-      // revising it asynchrnously, but that would be bad too.
-      // actually forget that, i don't think it'd work either because of event loop scheduling.
-      this.issuedLists.set(room.toRoomIdOrAlias(), issuer);
-      return Ok(issuer);
-    } else {
-      return Ok(revisionIssuer);
-    }
+    return await this.issuedLists.getInstance(room.toRoomIdOrAlias(), room);
   }
   private async getInitialPolicyListRevision(
     room: MatrixRoomID
