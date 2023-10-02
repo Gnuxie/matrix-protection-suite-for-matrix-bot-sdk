@@ -42,12 +42,13 @@ import {
   isError,
   PolicyRuleEvent,
   isPolicyRuleEvent,
-  PolicyListRevisionIssuer,
-  StandardPolicyListRevisionIssuer,
   StandardPolicyListRevision,
-  PolicyListRevision,
   PolicyListEditor,
   InternedInstanceFactory,
+  PolicyRoomRevisionIssuer,
+  PolicyRoomRevision,
+  StandardPolicyRoomRevision,
+  StandardPolicyRoomRevisionIssuer,
 } from 'brokkr';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { BotSDKPolicyListEditor } from './PolicyListEditor';
@@ -55,7 +56,7 @@ import { BotSDKPolicyListEditor } from './PolicyListEditor';
 export class BotSDKPolicyListManager implements PolicyListManager {
   private readonly issuedLists: InternedInstanceFactory<
     string /*room id*/,
-    PolicyListRevisionIssuer,
+    PolicyRoomRevisionIssuer,
     [MatrixRoomID]
   >;
 
@@ -68,20 +69,20 @@ export class BotSDKPolicyListManager implements PolicyListManager {
   constructor(private readonly client: MatrixSendClient) {
     this.issuedLists = new InternedInstanceFactory<
       string /*room id*/,
-      PolicyListRevisionIssuer,
+      PolicyRoomRevisionIssuer,
       [MatrixRoomID]
     >(
       async (
         _key: string,
         room: MatrixRoomID
-      ): Promise<ActionResult<PolicyListRevisionIssuer>> => {
-        const initialRevisionResult = await this.getInitialPolicyListRevision(
+      ): Promise<ActionResult<PolicyRoomRevisionIssuer>> => {
+        const initialRevisionResult = await this.getInitialPolicyRoomRevision(
           room
         );
         if (isError(initialRevisionResult)) {
           return initialRevisionResult;
         }
-        const issuer = new StandardPolicyListRevisionIssuer(
+        const issuer = new StandardPolicyRoomRevisionIssuer(
           room,
           initialRevisionResult.ok,
           this
@@ -94,7 +95,7 @@ export class BotSDKPolicyListManager implements PolicyListManager {
       PolicyListEditor,
       [MatrixRoomID]
     >(async (roomId: string, room: MatrixRoomID) => {
-      const issuer = await this.getListRevisionIssuer(room);
+      const issuer = await this.getPolicyRoomRevisionIssuer(room);
       if (isError(issuer)) {
         return issuer;
       }
@@ -193,21 +194,22 @@ export class BotSDKPolicyListManager implements PolicyListManager {
         )
     );
   }
-  public async getListRevisionIssuer(
+  public async getPolicyRoomRevisionIssuer(
     room: MatrixRoomID
-  ): Promise<ActionResult<PolicyListRevisionIssuer>> {
+  ): Promise<ActionResult<PolicyRoomRevisionIssuer>> {
     return await this.issuedLists.getInstance(room.toRoomIdOrAlias(), room);
   }
-  private async getInitialPolicyListRevision(
+  private async getInitialPolicyRoomRevision(
     room: MatrixRoomID
-  ): Promise<ActionResult<PolicyListRevision>> {
+  ): Promise<ActionResult<PolicyRoomRevision>> {
     const eventsResult = await this.getPolicyRuleEvents(room);
     if (isError(eventsResult)) {
       return eventsResult;
     }
-    const revision = StandardPolicyListRevision.blankRevision(room).revise(
-      eventsResult.ok
-    );
+    const revision = new StandardPolicyRoomRevision(
+      room,
+      StandardPolicyListRevision.blankRevision()
+    ).reviseFromState(eventsResult.ok);
     return Ok(revision);
   }
 }
