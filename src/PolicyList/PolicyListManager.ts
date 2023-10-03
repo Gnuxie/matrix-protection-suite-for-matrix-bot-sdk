@@ -31,7 +31,7 @@ import {
   MatrixRoomReference,
   POLICY_ROOM_TYPE,
   SHORTCODE_EVENT_TYPE,
-  PolicyListManager,
+  PolicyRoomManager,
   RoomCreateOptions,
   POLICY_ROOM_TYPE_VARIANTS,
   UserID,
@@ -43,7 +43,7 @@ import {
   PolicyRuleEvent,
   isPolicyRuleEvent,
   StandardPolicyListRevision,
-  PolicyListEditor,
+  PolicyRoomEditor,
   InternedInstanceFactory,
   PolicyRoomRevisionIssuer,
   PolicyRoomRevision,
@@ -51,9 +51,9 @@ import {
   StandardPolicyRoomRevisionIssuer,
 } from 'brokkr';
 import { MatrixSendClient } from '../MatrixEmitter';
-import { BotSDKPolicyListEditor } from './PolicyListEditor';
+import { BotSDKPolicyRoomEditor } from './PolicyListEditor';
 
-export class BotSDKPolicyListManager implements PolicyListManager {
+export class BotSDKPolicyRoomManager implements PolicyRoomManager {
   private readonly issuedLists: InternedInstanceFactory<
     string /*room id*/,
     PolicyRoomRevisionIssuer,
@@ -62,7 +62,7 @@ export class BotSDKPolicyListManager implements PolicyListManager {
 
   private readonly issuedEditors: InternedInstanceFactory<
     string /*room id*/,
-    PolicyListEditor,
+    PolicyRoomEditor,
     [MatrixRoomID]
   >;
 
@@ -92,24 +92,24 @@ export class BotSDKPolicyListManager implements PolicyListManager {
     );
     this.issuedEditors = new InternedInstanceFactory<
       string /*room id*/,
-      PolicyListEditor,
+      PolicyRoomEditor,
       [MatrixRoomID]
     >(async (roomId: string, room: MatrixRoomID) => {
       const issuer = await this.getPolicyRoomRevisionIssuer(room);
       if (isError(issuer)) {
         return issuer;
       }
-      const editor = new BotSDKPolicyListEditor(this.client, room, issuer.ok);
+      const editor = new BotSDKPolicyRoomEditor(this.client, room, issuer.ok);
       return Ok(editor);
     });
   }
-  public async getListEditor(
+  public async getPolicyRoomEditor(
     room: MatrixRoomID
-  ): Promise<ActionResult<PolicyListEditor>> {
+  ): Promise<ActionResult<PolicyRoomEditor>> {
     return await this.issuedEditors.getInstance(room.toRoomIdOrAlias(), room);
   }
 
-  public async createList(
+  public async createPolicyRoom(
     shortcode: string,
     invite: string[],
     createRoomOptions: RoomCreateOptions

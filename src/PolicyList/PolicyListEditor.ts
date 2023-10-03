@@ -31,7 +31,7 @@ import {
   ActionResult,
   MatrixRoomID,
   Ok,
-  PolicyListEditor,
+  PolicyRoomEditor,
   PolicyListRevisionIssuer,
   PolicyRule,
   PolicyRuleType,
@@ -44,7 +44,7 @@ import { SHA256 } from 'crypto-js';
 import Base64 from 'crypto-js/enc-base64';
 import { MatrixSendClient } from '../MatrixEmitter';
 
-export class BotSDKPolicyListEditor implements PolicyListEditor {
+export class BotSDKPolicyRoomEditor implements PolicyRoomEditor {
   constructor(
     private readonly client: MatrixSendClient,
     private readonly room: MatrixRoomID,
