@@ -39,7 +39,7 @@ import {
   isError,
   isPolicyRuleEvent,
   variantsForPolicyRuleType,
-} from 'brokkr';
+} from 'matrix-protection-suite';
 import { SHA256 } from 'crypto-js';
 import Base64 from 'crypto-js/enc-base64';
 import { MatrixSendClient } from '../MatrixEmitter';

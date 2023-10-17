@@ -42,14 +42,13 @@ import {
   isError,
   PolicyRuleEvent,
   isPolicyRuleEvent,
-  StandardPolicyListRevision,
   PolicyRoomEditor,
   InternedInstanceFactory,
   PolicyRoomRevisionIssuer,
   PolicyRoomRevision,
   StandardPolicyRoomRevision,
   StandardPolicyRoomRevisionIssuer,
-} from 'brokkr';
+} from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { BotSDKPolicyRoomEditor } from './PolicyListEditor';
 
@@ -206,9 +205,8 @@ export class BotSDKPolicyRoomManager implements PolicyRoomManager {
     if (isError(eventsResult)) {
       return eventsResult;
     }
-    const revision = new StandardPolicyRoomRevision(
-      room,
-      StandardPolicyListRevision.blankRevision()
+    const revision = StandardPolicyRoomRevision.blankRevision(
+      room
     ).reviseFromState(eventsResult.ok);
     return Ok(revision);
   }

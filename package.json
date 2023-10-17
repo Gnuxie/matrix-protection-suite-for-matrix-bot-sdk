@@ -77,7 +77,7 @@
     ]
   },
   "dependencies": {
-    "brokkr": "link:../Brokkr"
+    "matrix-protection-suite": "git+https://github.com/Gnuxie/matrix-protection-suite.git#0.2.0"
   },
   "peerDependencies": {
     "matrix-bot-sdk": ">=0.6.4"
