@@ -23,7 +23,7 @@
     "make:docs": "typedoc",
     "test": "jest --coverage",
     "test:ci": "cross-env CI=1 jest",
-    "prepare": "husky install"
+    "prepare": "husky install && yarn build"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^17.4.4",
@@ -76,10 +76,9 @@
       "@commitlint/config-conventional"
     ]
   },
-  "dependencies": {
-    "matrix-protection-suite": "git+https://github.com/Gnuxie/matrix-protection-suite.git"
-  },
+  "dependencies": {},
   "peerDependencies": {
-    "matrix-bot-sdk": ">=0.6.4"
+    "matrix-bot-sdk": ">=0.6.4",
+    "matrix-protection-suite": "git+https://github.com/Gnuxie/matrix-protection-suite.git#0.4.0"
   }
 }

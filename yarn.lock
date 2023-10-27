@@ -708,9 +708,9 @@
   integrity sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==
 
 "@sinclair/typebox@^0.31.15":
-  version "0.31.15"
-  resolved "https://registry.yarnpkg.com/@sinclair/typebox/-/typebox-0.31.15.tgz#182bff2527c2953540f0b5e8d1851888fb57b2eb"
-  integrity sha512-gheE0Z2QWB/EuUwirniP+vq17N0MdQ+9bKyy2lPJzcBin6piBxOrazTYOB18N+oeBwVVepAmlqqo9KbpSl9DOA==
+  version "0.31.20"
+  resolved "https://registry.yarnpkg.com/@sinclair/typebox/-/typebox-0.31.20.tgz#74e855ba87a795f10c1eb9d791c7316d930d292e"
+  integrity sha512-pqkf2X6fc1yk6c3Rk41cT8NYFKmzngl8TVHy375X7ihlONCsX7/YTReRLyZX7zZhuUUBx9KTZPFFDZo6AIERCw==
 
 "@sinonjs/commons@^3.0.0":
   version "3.0.0"
@@ -1649,9 +1649,9 @@ cross-spawn@^7.0.1, cross-spawn@^7.0.2, cross-spawn@^7.0.3:
     which "^2.0.1"
 
 crypto-js@^4.1.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/crypto-js/-/crypto-js-4.1.1.tgz#9e485bcf03521041bd85844786b83fb7619736cf"
-  integrity sha512-o2JlM7ydqd3Qk9CA0L4NL6mTzU2sdx96a+oOfPu8Mkl/PK51vSyoi8/rQ8NknZtk44vq15lmhAj9CIAGwgeWKw==
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/crypto-js/-/crypto-js-4.2.0.tgz#4d931639ecdfd12ff80e8186dba6af2c2e856631"
+  integrity sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==
 
 css-declaration-sorter@^6.3.1:
   version "6.4.1"
@@ -3593,9 +3593,9 @@ matrix-bot-sdk@>=0.6.4:
     request-promise "^4.2.6"
     sanitize-html "^2.8.0"
 
-"matrix-protection-suite@git+https://github.com/Gnuxie/matrix-protection-suite.git":
-  version "0.3.0"
-  resolved "git+https://github.com/Gnuxie/matrix-protection-suite.git#1644a05a8bb8b37dc6d77df222ae6aa80119b989"
+"matrix-protection-suite@git+https://github.com/Gnuxie/matrix-protection-suite.git#0.4.0":
+  version "0.4.0"
+  resolved "git+https://github.com/Gnuxie/matrix-protection-suite.git#172058d9129d703e1ef4e43770fc6302e4555d06"
   dependencies:
     "@sinclair/typebox" "^0.31.15"
     crypto-js "^4.1.1"
@@ -5122,9 +5122,9 @@ typescript@^4.9.5:
   integrity sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==
 
 ulidx@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/ulidx/-/ulidx-2.1.0.tgz#7ba72328e0a3fab74310f86b7b8d3b5ebdec319e"
-  integrity sha512-DlMi97oP9HASI3kLCjBlOhAG1SoisUrEqC2PJ7itiFbq9q5Zo0JejupXeu2Gke99W62epNzA4MFNToNiq8A5LA==
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/ulidx/-/ulidx-2.2.1.tgz#9dd6e48630f7a4ba612461523bc86d9101038996"
+  integrity sha512-DU9F5t1tihdafuNyW3fIrXUFHHiHxmwuQSGVGIbSpqkc93IH4P0dU8nPhk0gOW7ARxaFu4+P/9cxVwn6PdnIaQ==
   dependencies:
     layerr "^2.0.1"
 

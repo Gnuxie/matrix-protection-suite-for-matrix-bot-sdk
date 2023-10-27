@@ -164,7 +164,7 @@ export class BotSDKPolicyRoomEditor implements PolicyRoomEditor {
         return Ok(undefined);
       }
     };
-    const rules = this.revisionIssuer.currentRevision.rulesMatchingEntity(
+    const rules = this.revisionIssuer.currentRevision.allRulesMatchingEntity(
       entity,
       ruleType
     );

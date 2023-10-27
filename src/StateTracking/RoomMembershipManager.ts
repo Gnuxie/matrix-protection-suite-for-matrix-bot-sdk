@@ -21,7 +21,6 @@ import {
   Value,
   isError,
 } from 'matrix-protection-suite';
-import { StaticDecode } from '@sinclair/typebox';
 import { MembershipEvent } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { StandardRoomMembershipRevisionIssuer } from 'matrix-protection-suite';
@@ -31,7 +30,7 @@ const log = new Logger('BotSDKRoomMembershipManager');
 async function getRoomMembershipEvents(
   room: MatrixRoomID,
   client: MatrixSendClient
-): Promise<ActionResult<StaticDecode<typeof MembershipEvent>[]>> {
+): Promise<ActionResult<MembershipEvent[]>> {
   const rawMembersResult = await client
     .doRequest(
       'GET',
@@ -58,7 +57,7 @@ async function getRoomMembershipEvents(
     log.error(message, rawMembersResult);
     return ActionError.Result(message);
   }
-  const members: StaticDecode<typeof MembershipEvent>[] = [];
+  const members: MembershipEvent[] = [];
   for (const rawEvent of rawMembersResult.ok['chunk']) {
     const memberResult = Value.Decode(MembershipEvent, rawEvent);
     if (isError(memberResult)) {
@@ -106,7 +105,7 @@ export class BotSDKRoomMembershipManager implements RoomMembershipManager {
   }
   public async getRoomMembershipEvents(
     room: MatrixRoomID
-  ): Promise<ActionResult<StaticDecode<typeof MembershipEvent>[]>> {
+  ): Promise<ActionResult<MembershipEvent[]>> {
     return await getRoomMembershipEvents(room, this.client);
   }
 }
@@ -149,7 +148,7 @@ export class BotSDKRoomStateRoomMembershipManager
   }
   public async getRoomMembershipEvents(
     room: MatrixRoomID
-  ): Promise<ActionResult<StaticDecode<typeof MembershipEvent>[]>> {
+  ): Promise<ActionResult<MembershipEvent[]>> {
     return await getRoomMembershipEvents(room, this.client);
   }
 }
