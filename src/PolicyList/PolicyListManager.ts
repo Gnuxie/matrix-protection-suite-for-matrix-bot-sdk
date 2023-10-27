@@ -48,49 +48,42 @@ import {
   PolicyRoomRevision,
   StandardPolicyRoomRevision,
   StandardPolicyRoomRevisionIssuer,
+  CreateInstanceFromKey,
+  StringRoomID,
+  RoomStateManager,
+  RoomStatePolicyRoomRevisionIssuer,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { BotSDKPolicyRoomEditor } from './PolicyListEditor';
 
-export class BotSDKPolicyRoomManager implements PolicyRoomManager {
+class AbstractBotSDKPolicyRoomManager implements PolicyRoomManager {
   private readonly issuedLists: InternedInstanceFactory<
-    string /*room id*/,
+    StringRoomID,
     PolicyRoomRevisionIssuer,
     [MatrixRoomID]
   >;
 
   private readonly issuedEditors: InternedInstanceFactory<
-    string /*room id*/,
+    StringRoomID,
     PolicyRoomEditor,
     [MatrixRoomID]
   >;
 
-  constructor(private readonly client: MatrixSendClient) {
-    this.issuedLists = new InternedInstanceFactory<
-      string /*room id*/,
+  constructor(
+    private readonly client: MatrixSendClient,
+    policyRoomRevisionIssuerFactory: CreateInstanceFromKey<
+      StringRoomID,
       PolicyRoomRevisionIssuer,
       [MatrixRoomID]
-    >(
-      async (
-        _key: string,
-        room: MatrixRoomID
-      ): Promise<ActionResult<PolicyRoomRevisionIssuer>> => {
-        const initialRevisionResult = await this.getInitialPolicyRoomRevision(
-          room
-        );
-        if (isError(initialRevisionResult)) {
-          return initialRevisionResult;
-        }
-        const issuer = new StandardPolicyRoomRevisionIssuer(
-          room,
-          initialRevisionResult.ok,
-          this
-        );
-        return Ok(issuer);
-      }
-    );
+    >
+  ) {
+    this.issuedLists = new InternedInstanceFactory<
+      StringRoomID,
+      PolicyRoomRevisionIssuer,
+      [MatrixRoomID]
+    >(policyRoomRevisionIssuerFactory);
     this.issuedEditors = new InternedInstanceFactory<
-      string /*room id*/,
+      StringRoomID,
       PolicyRoomEditor,
       [MatrixRoomID]
     >(async (roomId: string, room: MatrixRoomID) => {
@@ -98,7 +91,7 @@ export class BotSDKPolicyRoomManager implements PolicyRoomManager {
       if (isError(issuer)) {
         return issuer;
       }
-      const editor = new BotSDKPolicyRoomEditor(this.client, room, issuer.ok);
+      const editor = new BotSDKPolicyRoomEditor(client, room, issuer.ok);
       return Ok(editor);
     });
   }
@@ -198,7 +191,7 @@ export class BotSDKPolicyRoomManager implements PolicyRoomManager {
   ): Promise<ActionResult<PolicyRoomRevisionIssuer>> {
     return await this.issuedLists.getInstance(room.toRoomIdOrAlias(), room);
   }
-  private async getInitialPolicyRoomRevision(
+  protected async getInitialPolicyRoomRevision(
     room: MatrixRoomID
   ): Promise<ActionResult<PolicyRoomRevision>> {
     const eventsResult = await this.getPolicyRuleEvents(room);
@@ -209,5 +202,56 @@ export class BotSDKPolicyRoomManager implements PolicyRoomManager {
       room
     ).reviseFromState(eventsResult.ok);
     return Ok(revision);
+  }
+}
+
+export class BotSDKPolicyRoomManager
+  extends AbstractBotSDKPolicyRoomManager
+  implements PolicyRoomManager
+{
+  constructor(client: MatrixSendClient) {
+    super(
+      client,
+      async (
+        _key: string,
+        room: MatrixRoomID
+      ): Promise<ActionResult<PolicyRoomRevisionIssuer>> => {
+        const initialRevisionResult = await this.getInitialPolicyRoomRevision(
+          room
+        );
+        if (isError(initialRevisionResult)) {
+          return initialRevisionResult;
+        }
+        const issuer = new StandardPolicyRoomRevisionIssuer(
+          room,
+          initialRevisionResult.ok,
+          this
+        );
+        return Ok(issuer);
+      }
+    );
+  }
+}
+
+export class BotSDKRoomStatePolicyRoomManager
+  extends AbstractBotSDKPolicyRoomManager
+  implements PolicyRoomManager
+{
+  constructor(client: MatrixSendClient, roomStateManager: RoomStateManager) {
+    super(client, async (_key, room) => {
+      const roomStateIssuer = await roomStateManager.getRoomStateRevisionIssuer(
+        room
+      );
+      if (isError(roomStateIssuer)) {
+        return roomStateIssuer;
+      }
+      return Ok(
+        new RoomStatePolicyRoomRevisionIssuer(
+          room,
+          StandardPolicyRoomRevision.blankRevision(room),
+          roomStateIssuer.ok
+        )
+      );
+    });
   }
 }
