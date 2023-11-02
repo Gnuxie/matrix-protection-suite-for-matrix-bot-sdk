@@ -34,39 +34,42 @@ import { MatrixClient } from 'matrix-bot-sdk';
  * Used to provide a unified API for messages received from matrix-bot-sdk (using GET /sync)
  * when we're in single bot mode and messages received from matrix-appservice-bridge (using pushed /transaction)
  * when we're in appservice mode.
+ *
+ * The capability provided by these interfaces are too widespread though,
+ * and any client using this library should use the protections API
+ * to listen to events.
  */
 export declare interface MatrixEmitter extends EventEmitter {
   on(
     event: 'room.event',
-    listener: (roomId: string, mxEvent: any) => void
+    listener: (roomId: string, mxEvent: unknown) => void
   ): this;
-  emit(event: 'room.event', roomId: string, mxEvent: any): boolean;
   on(
     event: 'room.message',
-    listener: (roomId: string, mxEvent: any) => void
+    listener: (roomId: string, mxEvent: unknown) => void
   ): this;
-  emit(event: 'room.message', roomId: string, mxEvent: any): boolean;
   on(
     event: 'room.invite',
-    listener: (roomId: string, mxEvent: any) => void
+    listener: (roomId: string, mxEvent: unknown) => void
   ): this;
-  emit(event: 'room.invite', roomId: string, mxEvent: any): boolean;
   on(
     event: 'room.join',
-    listener: (roomId: string, mxEvent: any) => void
+    listener: (roomId: string, mxEvent: unknown) => void
   ): this;
-  emit(event: 'room.join', roomId: string, mxEvent: any): boolean;
   on(
     event: 'room.leave',
-    listener: (roomId: string, mxEvent: any) => void
+    listener: (roomId: string, mxEvent: unknown) => void
   ): this;
-  emit(event: 'room.leave', roomId: string, mxEvent: any): boolean;
   on(
     event: 'room.archived',
-    listener: (roomId: string, mxEvent: any) => void
+    listener: (roomId: string, mxEvent: unknown) => void
   ): this;
-  emit(event: 'room.archived', roomId: string, mxEvent: any): boolean;
-
+  emit(event: 'room.event', roomId: string, mxEvent: unknown): boolean;
+  emit(event: 'room.message', roomId: string, mxEvent: unknown): boolean;
+  emit(event: 'room.invite', roomId: string, mxEvent: unknown): boolean;
+  emit(event: 'room.join', roomId: string, mxEvent: unknown): boolean;
+  emit(event: 'room.leave', roomId: string, mxEvent: unknown): boolean;
+  emit(event: 'room.archived', roomId: string, mxEvent: unknown): boolean;
   start(): Promise<void>;
   stop(): void;
 }
