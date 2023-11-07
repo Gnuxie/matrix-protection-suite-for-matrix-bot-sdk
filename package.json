@@ -1,6 +1,6 @@
 {
   "name": "matrix-protection-suite-for-matrix-bot-sdk",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "main": "dist/index.min.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
@@ -80,6 +80,6 @@
   "dependencies": {},
   "peerDependencies": {
     "matrix-bot-sdk": ">=0.6.4",
-    "matrix-protection-suite": "git+https://github.com/Gnuxie/matrix-protection-suite.git#0.4.0"
+    "matrix-protection-suite": "git+https://github.com/Gnuxie/matrix-protection-suite.git#0.5.0"
   }
 }

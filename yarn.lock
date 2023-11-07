@@ -3593,9 +3593,9 @@ matrix-bot-sdk@>=0.6.4:
     request-promise "^4.2.6"
     sanitize-html "^2.8.0"
 
-"matrix-protection-suite@git+https://github.com/Gnuxie/matrix-protection-suite.git#0.4.0":
-  version "0.4.0"
-  resolved "git+https://github.com/Gnuxie/matrix-protection-suite.git#172058d9129d703e1ef4e43770fc6302e4555d06"
+"matrix-protection-suite@git+https://github.com/Gnuxie/matrix-protection-suite.git#0.5.0":
+  version "0.5.0"
+  resolved "git+https://github.com/Gnuxie/matrix-protection-suite.git#f47ecdd3d1011f419ec95dbcb776fa9d7b455c61"
   dependencies:
     "@sinclair/typebox" "^0.31.15"
     crypto-js "^4.1.1"
