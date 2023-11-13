@@ -16,6 +16,7 @@ import {
   ActionExceptionKind,
   Logger,
   MultipleErrors,
+  EventDecoder,
 } from 'matrix-protection-suite';
 import {
   RoomStateManager,
@@ -35,11 +36,12 @@ export class BotSDKRoomStateManager implements RoomStateManager {
 
   public constructor(
     public readonly trackingMeta: StateTrackingMeta,
+    private readonly eventDecoder: EventDecoder,
     private readonly client: MatrixSendClient
   ) {
     this.roomStateIssuers = new InternedInstanceFactory(
       async (_roomID, room) => {
-        const stateResult = await this.getRoomState(room, this.trackingMeta);
+        const stateResult = await this.getRoomState(room);
         if (isError(stateResult)) {
           return stateResult;
         }
@@ -60,14 +62,13 @@ export class BotSDKRoomStateManager implements RoomStateManager {
   }
 
   public async getRoomState(
-    room: MatrixRoomID,
-    trackingMeta: StateTrackingMeta
+    room: MatrixRoomID
   ): Promise<ActionResult<StateEvent[]>> {
     const decodeResults = await this.client
       .getRoomState(room.toRoomIdOrAlias())
       .then(
         (events) =>
-          Ok(events.map((event) => trackingMeta.decodeStateEvent(event))),
+          Ok(events.map((event) => this.eventDecoder.decodeStateEvent(event))),
         (exception: unknown) =>
           ActionError.Result(
             `Could not fetch the room state for the room ${room.toPermalink()}.`,
