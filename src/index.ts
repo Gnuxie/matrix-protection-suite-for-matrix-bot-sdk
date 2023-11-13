@@ -1,3 +1,4 @@
+export * from './ManagerManager';
 export * from './MatrixEmitter';
 
 export * from './PolicyList/PolicyListEditor';
