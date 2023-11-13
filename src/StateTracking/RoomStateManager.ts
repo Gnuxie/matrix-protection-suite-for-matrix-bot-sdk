@@ -54,7 +54,10 @@ export class BotSDKRoomStateManager implements RoomStateManager {
   }
 
   public handleTimelineEvent(roomID: StringRoomID, event: RoomEvent): void {
-    if (this.roomStateIssuers.hasInstance(roomID) && 'state_key' in event) {
+    if (
+      this.roomStateIssuers.hasInstance(roomID) &&
+      ('state_key' in event || event.type === 'm.room.redaction')
+    ) {
       const issuer = this.roomStateIssuers.getStoredInstance(roomID);
       if (issuer === undefined) {
         throw new TypeError(
