@@ -35,6 +35,7 @@ import {
   isError,
   Logger,
   RoomEvent,
+  RoomMessage,
 } from 'matrix-protection-suite';
 
 const log = new Logger('MatrixEmitter');
@@ -99,7 +100,7 @@ export declare interface SafeMatrixEmitter extends MatrixEmitter {
   ): this;
   on(
     event: 'room.message',
-    listener: (roomID: StringRoomID, mxEvent: RoomEvent) => void
+    listener: (roomID: StringRoomID, mxEvent: RoomMessage) => void
   ): this;
   on(
     event: 'room.invite',
