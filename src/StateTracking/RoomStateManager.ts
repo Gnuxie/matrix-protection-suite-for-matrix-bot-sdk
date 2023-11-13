@@ -17,6 +17,7 @@ import {
   Logger,
   MultipleErrors,
   EventDecoder,
+  RoomEvent,
 } from 'matrix-protection-suite';
 import {
   RoomStateManager,
@@ -50,6 +51,18 @@ export class BotSDKRoomStateManager implements RoomStateManager {
         );
       }
     );
+  }
+
+  public handleTimelineEvent(roomID: StringRoomID, event: RoomEvent): void {
+    if (this.roomStateIssuers.hasInstance(roomID) && 'state_key' in event) {
+      const issuer = this.roomStateIssuers.getStoredInstance(roomID);
+      if (issuer === undefined) {
+        throw new TypeError(
+          'Somehow the has method for the interned instances is lying or the code is wrong'
+        );
+      }
+      issuer.updateForEvent(event);
+    }
   }
 
   public async getRoomStateRevisionIssuer(
