@@ -27,6 +27,17 @@ limitations under the License.
 
 import EventEmitter from 'events';
 import { MatrixClient } from 'matrix-bot-sdk';
+import {
+  MembershipEvent,
+  StringRoomID,
+  isStringRoomID,
+  EventDecoder,
+  isError,
+  Logger,
+  RoomEvent,
+} from 'matrix-protection-suite';
+
+const log = new Logger('MatrixEmitter');
 
 /**
  * This is an interface created in order to keep the event listener
@@ -80,3 +91,108 @@ export declare interface MatrixEmitter extends EventEmitter {
  * rather than on the matrix-bot-sdk version of the matrix client.
  */
 export type MatrixSendClient = Omit<MatrixClient, keyof MatrixEmitter>;
+
+export declare interface SafeMatrixEmitter extends MatrixEmitter {
+  on(
+    event: 'room.event',
+    listener: (roomID: StringRoomID, mxEvent: RoomEvent) => void
+  ): this;
+  on(
+    event: 'room.message',
+    listener: (roomID: StringRoomID, mxEvent: RoomEvent) => void
+  ): this;
+  on(
+    event: 'room.invite',
+    listener: (roomID: StringRoomID, mxEvent: MembershipEvent) => void
+  ): this;
+  on(
+    event: 'room.join',
+    listener: (roomId: StringRoomID, mxEvent: MembershipEvent) => void
+  ): this;
+  on(
+    event: 'room.leave',
+    listener: (roomID: StringRoomID, mxEvent: MembershipEvent) => void
+  ): this;
+  on(
+    event: 'room.archived',
+    listener: (roomID: StringRoomID, mxEvent: RoomEvent) => void
+  ): this;
+  emit(
+    event:
+      | 'room.event'
+      | 'room.message'
+      | 'room.invite'
+      | 'room.join'
+      | 'room.leave'
+      | 'room.archived',
+    roomID: StringRoomID,
+    mxEvent: RoomEvent
+  ): boolean;
+}
+
+function makeListenerWrapper(
+  decoder: EventDecoder,
+  event:
+    | 'room.event'
+    | 'room.message'
+    | 'room.invite'
+    | 'room.join'
+    | 'room.leave'
+    | 'room.archived',
+  safeEmitter: SafeMatrixEmitter
+) {
+  return function (roomId: string, mxEvent: unknown) {
+    if (!isStringRoomID(roomId)) {
+      throw new TypeError(`Got a malformed room_id ${roomId}`);
+    }
+    const decodeResult = decoder.decodeEvent(mxEvent);
+    if (isError(decodeResult)) {
+      log.error(
+        `Got an error when decoding an event for a MatrixEmitter`,
+        decodeResult.error.uuid,
+        decodeResult.error
+      );
+      return;
+    }
+    safeEmitter.emit(event, roomId, decodeResult.ok);
+  };
+}
+
+export class SafeMatrixEmitterWrapper
+  extends EventEmitter
+  implements SafeMatrixEmitter
+{
+  constructor(
+    private readonly emitter: MatrixEmitter,
+    private readonly decoder: EventDecoder
+  ) {
+    super();
+    const events: (
+      | 'room.event'
+      | 'room.message'
+      | 'room.invite'
+      | 'room.join'
+      | 'room.leave'
+      | 'room.archived'
+    )[] = [
+      'room.event',
+      'room.message',
+      'room.invite',
+      'room.join',
+      'room.leave',
+      'room.archived',
+    ];
+    for (const event of events) {
+      // The overloads for event names in typescript don't quite work.
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      emitter.on(event, makeListenerWrapper(this.decoder, event, this));
+    }
+  }
+  start(): Promise<void> {
+    return this.emitter.start();
+  }
+  stop(): void {
+    this.emitter.stop();
+  }
+}
