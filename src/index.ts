@@ -1,3 +1,5 @@
+export * from './Interface/MatrixData';
+
 export * from './ManagerManager';
 export * from './MatrixEmitter';
 
