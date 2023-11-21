@@ -15,7 +15,7 @@ import { BotSDKRoomStateManager } from './StateTracking/RoomStateManager';
 import { BotSDKRoomStatePolicyRoomManager } from './PolicyList/PolicyListManager';
 import { BotSDKRoomStateRoomMembershipManager } from './StateTracking/RoomMembershipManager';
 
-interface ManagerManager {
+export interface ManagerManager {
   readonly roomStateManager: RoomStateManager;
   readonly policyRoomManager: PolicyRoomManager;
   readonly roomMembershipManager: RoomMembershipManager;
