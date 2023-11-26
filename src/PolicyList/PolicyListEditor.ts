@@ -61,7 +61,7 @@ export class BotSDKPolicyRoomEditor implements PolicyRoomEditor {
   ): Promise<ActionResult<string>> {
     const stateKey = Base64.stringify(SHA256(entity + recommendation));
     return await this.client
-      .sendStateEvent(this.room.toRoomIdOrAlias(), entityType, stateKey, {
+      .sendStateEvent(this.room.toRoomIDOrAlias(), entityType, stateKey, {
         recommendation,
         entity,
         reason,
@@ -88,7 +88,7 @@ export class BotSDKPolicyRoomEditor implements PolicyRoomEditor {
       stateKey: string
     ): Promise<ActionResult<void>> => {
       return await this.client
-        .sendStateEvent(this.room.toRoomIdOrAlias(), stateType, stateKey, {})
+        .sendStateEvent(this.room.toRoomIDOrAlias(), stateType, stateKey, {})
         .then(
           (_eventId) => Ok(undefined),
           (exception) =>
@@ -103,7 +103,7 @@ export class BotSDKPolicyRoomEditor implements PolicyRoomEditor {
       stateKey: string
     ): Promise<ActionResult<string | null>> => {
       return await this.client
-        .getRoomStateEvent(this.room.toRoomIdOrAlias(), stateType, stateKey)
+        .getRoomStateEvent(this.room.toRoomIDOrAlias(), stateType, stateKey)
         .then(
           (event) => {
             if (!isPolicyRuleEvent(event)) {

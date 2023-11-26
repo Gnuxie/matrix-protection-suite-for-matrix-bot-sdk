@@ -100,7 +100,7 @@ class AbstractBotSDKPolicyRoomManager implements PolicyRoomManager {
   public async getPolicyRoomEditor(
     room: MatrixRoomID
   ): Promise<ActionResult<PolicyRoomEditor>> {
-    return await this.issuedEditors.getInstance(room.toRoomIdOrAlias(), room);
+    return await this.issuedEditors.getInstance(room.toRoomIDOrAlias(), room);
   }
 
   public async createPolicyRoom(
@@ -179,7 +179,7 @@ class AbstractBotSDKPolicyRoomManager implements PolicyRoomManager {
   getPolicyRuleEvents(
     room: MatrixRoomReference
   ): Promise<ActionResult<PolicyRuleEvent[]>> {
-    return this.client.getRoomState(room.toRoomIdOrAlias()).then(
+    return this.client.getRoomState(room.toRoomIDOrAlias()).then(
       (events) => Ok(events.filter(isPolicyRuleEvent)),
       (exception) =>
         ActionError.Result(
@@ -191,7 +191,7 @@ class AbstractBotSDKPolicyRoomManager implements PolicyRoomManager {
   public async getPolicyRoomRevisionIssuer(
     room: MatrixRoomID
   ): Promise<ActionResult<PolicyRoomRevisionIssuer>> {
-    return await this.issuedLists.getInstance(room.toRoomIdOrAlias(), room);
+    return await this.issuedLists.getInstance(room.toRoomIDOrAlias(), room);
   }
   protected async getInitialPolicyRoomRevision(
     room: MatrixRoomID

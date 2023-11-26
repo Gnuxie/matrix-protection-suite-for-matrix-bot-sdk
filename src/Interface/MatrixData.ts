@@ -80,7 +80,7 @@ export class BotSDKMatrixStateData<T> implements MatrixStateData<T> {
   ): Promise<ActionResult<void>> {
     return await this.client
       .sendStateEvent(
-        this.roomStateRevisionIssuer.room.toRoomIdOrAlias(),
+        this.roomStateRevisionIssuer.room.toRoomIDOrAlias(),
         this.eventType,
         state_key,
         content

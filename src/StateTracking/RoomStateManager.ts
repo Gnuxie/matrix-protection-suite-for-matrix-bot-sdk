@@ -72,7 +72,7 @@ export class BotSDKRoomStateManager implements RoomStateManager {
     room: MatrixRoomID
   ): Promise<ActionResult<RoomStateRevisionIssuer>> {
     return await this.roomStateIssuers.getInstance(
-      room.toRoomIdOrAlias(),
+      room.toRoomIDOrAlias(),
       room
     );
   }
@@ -81,7 +81,7 @@ export class BotSDKRoomStateManager implements RoomStateManager {
     room: MatrixRoomID
   ): Promise<ActionResult<StateEvent[]>> {
     const decodeResults = await this.client
-      .getRoomState(room.toRoomIdOrAlias())
+      .getRoomState(room.toRoomIDOrAlias())
       .then(
         (events) =>
           Ok(events.map((event) => this.eventDecoder.decodeStateEvent(event))),

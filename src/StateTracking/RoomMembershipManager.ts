@@ -35,7 +35,7 @@ async function getRoomMembershipEvents(
     .doRequest(
       'GET',
       `/_matrix/client/v3/rooms/${encodeURIComponent(
-        room.toRoomIdOrAlias()
+        room.toRoomIDOrAlias()
       )}/members`
     )
     .then(
@@ -101,7 +101,7 @@ export class BotSDKRoomMembershipManager implements RoomMembershipManager {
   getRoomMembershipRevisionIssuer(
     room: MatrixRoomID
   ): Promise<ActionResult<RoomMembershipRevisionIssuer>> {
-    return this.roomMembershipIssuers.getInstance(room.toRoomIdOrAlias(), room);
+    return this.roomMembershipIssuers.getInstance(room.toRoomIDOrAlias(), room);
   }
   public async getRoomMembershipEvents(
     room: MatrixRoomID
@@ -144,7 +144,7 @@ export class BotSDKRoomStateRoomMembershipManager
   getRoomMembershipRevisionIssuer(
     room: MatrixRoomID
   ): Promise<ActionResult<RoomMembershipRevisionIssuer>> {
-    return this.roomMembershipIssuers.getInstance(room.toRoomIdOrAlias(), room);
+    return this.roomMembershipIssuers.getInstance(room.toRoomIDOrAlias(), room);
   }
   public async getRoomMembershipEvents(
     room: MatrixRoomID
