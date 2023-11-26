@@ -52,6 +52,8 @@ import {
   StringRoomID,
   RoomStateManager,
   RoomStatePolicyRoomRevisionIssuer,
+  PolicyRuleType,
+  StringUserID,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { BotSDKPolicyRoomEditor } from './PolicyListEditor';
@@ -202,6 +204,17 @@ class AbstractBotSDKPolicyRoomManager implements PolicyRoomManager {
       room
     ).reviseFromState(eventsResult.ok);
     return Ok(revision);
+  }
+
+  getEditablePolicyRoomIDs(
+    editor: StringUserID,
+    ruleType: PolicyRuleType
+  ): MatrixRoomID[] {
+    const editableRoomIDs = this.issuedLists
+      .allInstances()
+      .filter((issuer) => issuer.currentRevision.isAbleToEdit(editor, ruleType))
+      .map((issuer) => issuer.currentRevision.room);
+    return editableRoomIDs;
   }
 }
 
