@@ -107,7 +107,7 @@ class AbstractBotSDKPolicyRoomManager implements PolicyRoomManager {
     shortcode: string,
     invite: string[],
     createRoomOptions: RoomCreateOptions
-  ): Promise<ActionResult<MatrixRoomReference, ActionError>> {
+  ): Promise<ActionResult<MatrixRoomID>> {
     const rawCreatorResult = await this.client.getUserId().then(
       (user) => Ok(user),
       (exception) =>
