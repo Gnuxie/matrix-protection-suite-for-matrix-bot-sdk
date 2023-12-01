@@ -12,4 +12,7 @@ export * from './Protection/MjolnirWatchedPolicyRoomsStore';
 export * from './StateTracking/RoomMembershipManager';
 export * from './StateTracking/RoomStateManager';
 export * from './StateTracking/StateTrackingMeta';
+
+export * from './SynapseAdmin/SynapseAdminClient';
+
 export * from './SafeMatrixClient';
