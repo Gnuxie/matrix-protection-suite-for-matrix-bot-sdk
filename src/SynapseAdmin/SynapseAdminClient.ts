@@ -76,7 +76,7 @@ export class SynapseAdminClient {
 
   public async deactivateUser(
     targetUserID: StringUserID,
-    { erase = false }: SynapseAdminPostUserDeactivateRequest
+    { erase = false }: SynapseAdminPostUserDeactivateRequest = {}
   ): Promise<ActionResult<void>> {
     const endpoint = `/_synapse/admin/v1/deactivate/${encodeURIComponent(
       targetUserID
@@ -95,7 +95,7 @@ export class SynapseAdminClient {
 
   public async deleteRoom(
     roomID: StringRoomID,
-    { block = true, ...otherOptions }: SynapseAdminDeleteRoomRequest
+    { block = true, ...otherOptions }: SynapseAdminDeleteRoomRequest = {}
   ): Promise<ActionResult<void>> {
     const endpoint = `/_synapse/admin/v1/rooms/${encodeURIComponent(roomID)}`;
     return await this.client
