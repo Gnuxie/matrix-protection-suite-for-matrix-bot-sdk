@@ -121,7 +121,7 @@ export class SynapseAdminClient {
    */
   public async makeUserRoomAdmin(
     roomID: StringRoomID,
-    userID: StringRoomID
+    userID: StringUserID
   ): Promise<ActionResult<void>> {
     const endpoint = `/_synapse/admin/v1/rooms/${encodeURIComponent(
       roomID
