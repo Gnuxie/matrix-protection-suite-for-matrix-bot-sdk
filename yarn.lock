@@ -1197,6 +1197,11 @@ atob@^2.1.2:
   resolved "https://registry.yarnpkg.com/atob/-/atob-2.1.2.tgz#6d9517eb9e030d2436666651e86bd9f6f13533c9"
   integrity sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==
 
+await-lock@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/await-lock/-/await-lock-2.2.2.tgz#a95a9b269bfd2f69d22b17a321686f551152bcef"
+  integrity sha512-aDczADvlvTGajTDjcjpJMqRkOF6Qdz3YbPZm/PyW6tKPkx2hlYBzxMhEywM/tU72HrVZjgl5VCdRuMlA7pZ8Gw==
+
 aws-sign2@~0.7.0:
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/aws-sign2/-/aws-sign2-0.7.0.tgz#b46e890934a9591f2d2f6f86d7e6a9f1b3fe76a8"
@@ -3593,11 +3598,12 @@ matrix-bot-sdk@>=0.6.4:
     request-promise "^4.2.6"
     sanitize-html "^2.8.0"
 
-"matrix-protection-suite@git+https://github.com/Gnuxie/matrix-protection-suite.git#0.5.0":
-  version "0.5.0"
-  resolved "git+https://github.com/Gnuxie/matrix-protection-suite.git#f47ecdd3d1011f419ec95dbcb776fa9d7b455c61"
+"matrix-protection-suite@git+https://github.com/Gnuxie/matrix-protection-suite.git#0.6.0":
+  version "0.6.0"
+  resolved "git+https://github.com/Gnuxie/matrix-protection-suite.git#c702c3035107e9bd8296be3409816e2eaae572fd"
   dependencies:
     "@sinclair/typebox" "^0.31.15"
+    await-lock "^2.2.2"
     crypto-js "^4.1.1"
     glob-to-regexp "^0.4.1"
     immutable "^5.0.0-beta.4"
