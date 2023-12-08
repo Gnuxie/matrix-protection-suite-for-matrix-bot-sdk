@@ -91,7 +91,10 @@ export declare interface MatrixEmitter extends EventEmitter {
  * This is in order to enforce listeners are added to `MatrixEmitter`s
  * rather than on the matrix-bot-sdk version of the matrix client.
  */
-export type MatrixSendClient = Omit<MatrixClient, keyof MatrixEmitter>;
+export type MatrixSendClient = Omit<
+  MatrixClient,
+  keyof MatrixEmitter | 'crypto'
+>;
 
 export declare interface SafeMatrixEmitter extends MatrixEmitter {
   on(
