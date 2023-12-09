@@ -70,6 +70,6 @@
   "peerDependencies": {
     "@sinclair/typebox": "~0.31.15",
     "matrix-bot-sdk": ">=0.6.4",
-    "matrix-protection-suite": "git+https://github.com/Gnuxie/matrix-protection-suite.git#0.6.0"
+    "matrix-protection-suite": "git+https://github.com/Gnuxie/matrix-protection-suite.git#0.8.0"
   }
 }
