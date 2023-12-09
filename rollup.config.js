@@ -56,7 +56,11 @@ module.exports = {
     // which external modules to include in the bundle
     // https://github.com/rollup/rollup-plugin-node-resolve#usage
     resolve({
-      external: ['matrix-bot-sdk', 'matrix-protection-suite'],
+      external: [
+        'matrix-bot-sdk',
+        'matrix-protection-suite',
+        '@sinclair/typebox',
+      ],
     }),
     // Resolve source maps to the original source
     sourceMaps(),
