@@ -13,6 +13,8 @@ export * from './StateTracking/RoomMembershipManager';
 export * from './StateTracking/RoomStateManager';
 export * from './StateTracking/StateTrackingMeta';
 
+export * from './UserManagement/JoinedRoomsSafe';
+
 export * from './SynapseAdmin/SynapseAdminClient';
 
 export * from './SafeMatrixClient';
