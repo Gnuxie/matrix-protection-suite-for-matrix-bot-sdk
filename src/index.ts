@@ -1,3 +1,5 @@
+export * from './ClientManagement/JoinedRoomsSafe';
+
 export * from './Interface/MatrixData';
 
 export * from './ManagerManager';
@@ -12,8 +14,6 @@ export * from './Protection/MjolnirWatchedPolicyRoomsStore';
 export * from './StateTracking/RoomMembershipManager';
 export * from './StateTracking/RoomStateManager';
 export * from './StateTracking/StateTrackingMeta';
-
-export * from './UserManagement/JoinedRoomsSafe';
 
 export * from './SynapseAdmin/SynapseAdminClient';
 
