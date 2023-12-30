@@ -1,0 +1,40 @@
+/**
+ * Copyright (C) 2023 Gnuxie <Gnuxie@protonmail.com>
+ * All rights reserved.
+ */
+
+import {
+  ActionException,
+  ActionExceptionKind,
+  ActionResult,
+  ClientRooms,
+  ClientsInRoomMap,
+  Ok,
+  StringRoomID,
+  StringUserID,
+} from 'matrix-protection-suite';
+import { MatrixSendClient } from '../MatrixEmitter';
+
+export type ClientForUserID = (
+  clientUserID: StringUserID
+) => Promise<MatrixSendClient>;
+
+export interface ClientManagement {
+  clientsInRoomMap: ClientsInRoomMap;
+  getClientRooms(
+    clientUserID: StringUserID
+  ): Promise<ActionResult<ClientRooms>>;
+}
+
+export async function joinedRoomsSafe(
+  client: MatrixSendClient
+): Promise<ActionResult<StringRoomID[]>> {
+  return await client.getJoinedRooms().then(
+    (rooms) => Ok(rooms as StringRoomID[]),
+    (exception) =>
+      ActionException.Result(`Unable to get joined rooms`, {
+        exception,
+        exceptionKind: ActionExceptionKind.Unknown,
+      })
+  );
+}

@@ -8,22 +8,18 @@ import {
   ActionException,
   ActionExceptionKind,
   ActionResult,
-  InternedInstanceFactory,
   Logger,
   MatrixRoomID,
   Ok,
   RoomMembershipManager,
   RoomMembershipRevisionIssuer,
-  RoomStateManager,
-  RoomStateMembershipRevisionIssuer,
-  StandardRoomMembershipRevision,
-  StringRoomID,
+  StringUserID,
   Value,
   isError,
 } from 'matrix-protection-suite';
 import { MembershipEvent } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
-import { StandardRoomMembershipRevisionIssuer } from 'matrix-protection-suite';
+import { RoomStateManagerFactory } from '../ClientManagement/RoomStateManagerFactory';
 
 const log = new Logger('BotSDKRoomMembershipManager');
 
@@ -72,80 +68,24 @@ async function getRoomMembershipEvents(
   }
   return Ok(members);
 }
-
 export class BotSDKRoomMembershipManager implements RoomMembershipManager {
-  private readonly roomMembershipIssuers: InternedInstanceFactory<
-    StringRoomID,
-    RoomMembershipRevisionIssuer,
-    [MatrixRoomID]
-  >;
-
-  public constructor(private readonly client: MatrixSendClient) {
-    this.roomMembershipIssuers = new InternedInstanceFactory(
-      async (_roomID, room) => {
-        const membersResult = await this.getRoomMembershipEvents(room);
-        if (isError(membersResult)) {
-          return membersResult;
-        }
-        // we need to make the revision issuer but it's blank atm.
-        const revision = StandardRoomMembershipRevision.blankRevision(
-          room
-        ).reviseFromMembership(membersResult.ok);
-        return Ok(
-          new StandardRoomMembershipRevisionIssuer(room, revision, this)
-        );
-      }
-    );
-  }
-
-  getRoomMembershipRevisionIssuer(
-    room: MatrixRoomID
-  ): Promise<ActionResult<RoomMembershipRevisionIssuer>> {
-    return this.roomMembershipIssuers.getInstance(room.toRoomIDOrAlias(), room);
-  }
-  public async getRoomMembershipEvents(
-    room: MatrixRoomID
-  ): Promise<ActionResult<MembershipEvent[]>> {
-    return await getRoomMembershipEvents(room, this.client);
-  }
-}
-
-export class BotSDKRoomStateRoomMembershipManager
-  implements RoomMembershipManager
-{
-  private readonly roomMembershipIssuers: InternedInstanceFactory<
-    StringRoomID,
-    RoomMembershipRevisionIssuer,
-    [MatrixRoomID]
-  >;
-
   public constructor(
+    public readonly clientUserID: StringUserID,
     private readonly client: MatrixSendClient,
-    private readonly roomStateManager: RoomStateManager
+    private readonly factory: RoomStateManagerFactory
   ) {
-    this.roomMembershipIssuers = new InternedInstanceFactory(
-      async (_roomID, room) => {
-        const stateIssuer =
-          await this.roomStateManager.getRoomStateRevisionIssuer(room);
-        if (isError(stateIssuer)) {
-          return stateIssuer;
-        }
-        return Ok(
-          new RoomStateMembershipRevisionIssuer(
-            room,
-            StandardRoomMembershipRevision.blankRevision(room),
-            stateIssuer.ok
-          )
-        );
-      }
+    // nothing to do.
+  }
+
+  public async getRoomMembershipRevisionIssuer(
+    room: MatrixRoomID
+  ): Promise<ActionResult<RoomMembershipRevisionIssuer>> {
+    return await this.factory.getRoomMembershipRevisionIssuer(
+      room,
+      this.clientUserID
     );
   }
 
-  getRoomMembershipRevisionIssuer(
-    room: MatrixRoomID
-  ): Promise<ActionResult<RoomMembershipRevisionIssuer>> {
-    return this.roomMembershipIssuers.getInstance(room.toRoomIDOrAlias(), room);
-  }
   public async getRoomMembershipEvents(
     room: MatrixRoomID
   ): Promise<ActionResult<MembershipEvent[]>> {

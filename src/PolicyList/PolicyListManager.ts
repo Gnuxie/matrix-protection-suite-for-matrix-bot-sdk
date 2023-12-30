@@ -45,58 +45,39 @@ import {
   PolicyRoomEditor,
   InternedInstanceFactory,
   PolicyRoomRevisionIssuer,
-  PolicyRoomRevision,
-  StandardPolicyRoomRevision,
-  StandardPolicyRoomRevisionIssuer,
-  CreateInstanceFromKey,
   StringRoomID,
-  RoomStateManager,
-  RoomStatePolicyRoomRevisionIssuer,
   PolicyRuleType,
   StringUserID,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { BotSDKPolicyRoomEditor } from './PolicyListEditor';
+import { RoomStateManagerFactory } from '../ClientManagement/RoomStateManagerFactory';
 
-class AbstractBotSDKPolicyRoomManager implements PolicyRoomManager {
-  private readonly issuedLists: InternedInstanceFactory<
-    StringRoomID,
-    PolicyRoomRevisionIssuer,
-    [MatrixRoomID]
-  >;
-
-  private readonly issuedEditors: InternedInstanceFactory<
+export class BotSDKPolicyRoomManager implements PolicyRoomManager {
+  private readonly issuedEditors = new InternedInstanceFactory<
     StringRoomID,
     PolicyRoomEditor,
     [MatrixRoomID]
-  >;
+  >(async (_roomID, room) => {
+    const issuer = await this.factory.getPolicyRoomRevisionIssuer(
+      room,
+      this.clientUserID
+    );
+    if (isError(issuer)) {
+      return issuer;
+    }
+    const editor = new BotSDKPolicyRoomEditor(this.client, room, issuer.ok);
+    return Ok(editor);
+  });
 
-  constructor(
+  public constructor(
+    public readonly clientUserID: StringUserID,
     private readonly client: MatrixSendClient,
-    policyRoomRevisionIssuerFactory: CreateInstanceFromKey<
-      StringRoomID,
-      PolicyRoomRevisionIssuer,
-      [MatrixRoomID]
-    >
+    private readonly factory: RoomStateManagerFactory
   ) {
-    this.issuedLists = new InternedInstanceFactory<
-      StringRoomID,
-      PolicyRoomRevisionIssuer,
-      [MatrixRoomID]
-    >(policyRoomRevisionIssuerFactory);
-    this.issuedEditors = new InternedInstanceFactory<
-      StringRoomID,
-      PolicyRoomEditor,
-      [MatrixRoomID]
-    >(async (roomId: string, room: MatrixRoomID) => {
-      const issuer = await this.getPolicyRoomRevisionIssuer(room);
-      if (isError(issuer)) {
-        return issuer;
-      }
-      const editor = new BotSDKPolicyRoomEditor(client, room, issuer.ok);
-      return Ok(editor);
-    });
+    // nothing to do.
   }
+
   public async getPolicyRoomEditor(
     room: MatrixRoomID
   ): Promise<ActionResult<PolicyRoomEditor>> {
@@ -176,6 +157,7 @@ class AbstractBotSDKPolicyRoomManager implements PolicyRoomManager {
         )
     );
   }
+
   getPolicyRuleEvents(
     room: MatrixRoomReference
   ): Promise<ActionResult<PolicyRuleEvent[]>> {
@@ -188,83 +170,20 @@ class AbstractBotSDKPolicyRoomManager implements PolicyRoomManager {
         )
     );
   }
+
   public async getPolicyRoomRevisionIssuer(
     room: MatrixRoomID
   ): Promise<ActionResult<PolicyRoomRevisionIssuer>> {
-    return await this.issuedLists.getInstance(room.toRoomIDOrAlias(), room);
-  }
-  protected async getInitialPolicyRoomRevision(
-    room: MatrixRoomID
-  ): Promise<ActionResult<PolicyRoomRevision>> {
-    const eventsResult = await this.getPolicyRuleEvents(room);
-    if (isError(eventsResult)) {
-      return eventsResult;
-    }
-    const revision = StandardPolicyRoomRevision.blankRevision(
-      room
-    ).reviseFromState(eventsResult.ok);
-    return Ok(revision);
+    return await this.factory.getPolicyRoomRevisionIssuer(
+      room,
+      this.clientUserID
+    );
   }
 
-  getEditablePolicyRoomIDs(
+  public getEditablePolicyRoomIDs(
     editor: StringUserID,
     ruleType: PolicyRuleType
   ): MatrixRoomID[] {
-    const editableRoomIDs = this.issuedLists
-      .allInstances()
-      .filter((issuer) => issuer.currentRevision.isAbleToEdit(editor, ruleType))
-      .map((issuer) => issuer.currentRevision.room);
-    return editableRoomIDs;
-  }
-}
-
-export class BotSDKPolicyRoomManager
-  extends AbstractBotSDKPolicyRoomManager
-  implements PolicyRoomManager
-{
-  constructor(client: MatrixSendClient) {
-    super(
-      client,
-      async (
-        _key: string,
-        room: MatrixRoomID
-      ): Promise<ActionResult<PolicyRoomRevisionIssuer>> => {
-        const initialRevisionResult = await this.getInitialPolicyRoomRevision(
-          room
-        );
-        if (isError(initialRevisionResult)) {
-          return initialRevisionResult;
-        }
-        const issuer = new StandardPolicyRoomRevisionIssuer(
-          room,
-          initialRevisionResult.ok,
-          this
-        );
-        return Ok(issuer);
-      }
-    );
-  }
-}
-
-export class BotSDKRoomStatePolicyRoomManager
-  extends AbstractBotSDKPolicyRoomManager
-  implements PolicyRoomManager
-{
-  constructor(client: MatrixSendClient, roomStateManager: RoomStateManager) {
-    super(client, async (_key, room) => {
-      const roomStateIssuer = await roomStateManager.getRoomStateRevisionIssuer(
-        room
-      );
-      if (isError(roomStateIssuer)) {
-        return roomStateIssuer;
-      }
-      return Ok(
-        new RoomStatePolicyRoomRevisionIssuer(
-          room,
-          StandardPolicyRoomRevision.blankRevision(room),
-          roomStateIssuer.ok
-        )
-      );
-    });
+    return this.factory.getEditablePolicyRoomIDs(editor, ruleType);
   }
 }
