@@ -105,7 +105,7 @@ export class RoomStateManagerFactory {
   });
 
   constructor(
-    private readonly clientsInRoomMap: ClientsInRoomMap,
+    public readonly clientsInRoomMap: ClientsInRoomMap,
     private readonly clientProvider: ClientForUserID,
     private readonly eventDecoder: EventDecoder,
     private readonly trackingMeta: StateTrackingMeta
