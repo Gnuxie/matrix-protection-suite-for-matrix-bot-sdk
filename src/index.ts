@@ -13,7 +13,6 @@ export * from './Protection/MjolnirProtectedRoomsStore';
 export * from './Protection/MjolnirWatchedPolicyRoomsStore';
 
 export * from './StateTracking/RoomMembershipManager';
-export * from './StateTracking/StateTrackingMeta';
 
 export * from './SynapseAdmin/SynapseAdminClient';
 
