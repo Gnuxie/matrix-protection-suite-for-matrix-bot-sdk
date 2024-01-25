@@ -108,6 +108,8 @@ export class BotSDKPolicyRoomEditor implements PolicyRoomEditor {
           (event) => {
             if (!isPolicyRuleEvent(event)) {
               return Ok(null);
+            } else if (!('recommendation' in event.content)) {
+              return Ok(null);
             }
             if (event.content.recommendation === recommendation) {
               return Ok(stateType);
