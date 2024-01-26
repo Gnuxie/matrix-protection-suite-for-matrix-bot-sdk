@@ -28,7 +28,6 @@ import {
   StandardRoomMembershipRevision,
   StandardRoomStateRevisionIssuer,
   StateEvent,
-  StateTrackingMeta,
   StringRoomID,
   StringUserID,
   isError,
@@ -53,8 +52,7 @@ export class RoomStateManagerFactory {
     return Ok(
       new StandardRoomStateRevisionIssuer(
         room,
-        this.getRoomStateForRevisionIssuer,
-        this.trackingMeta
+        this.getRoomStateForRevisionIssuer
       )
     );
   });
@@ -107,8 +105,7 @@ export class RoomStateManagerFactory {
   constructor(
     public readonly clientsInRoomMap: ClientsInRoomMap,
     private readonly clientProvider: ClientForUserID,
-    private readonly eventDecoder: EventDecoder,
-    private readonly trackingMeta: StateTrackingMeta
+    private readonly eventDecoder: EventDecoder
   ) {
     // nothing to do.
   }
