@@ -140,13 +140,15 @@ export class RoomStateManagerFactory {
         events.push(result.ok);
       }
     }
-    log.error(
-      `There were multiple errors while decoding state events for ${room.toPermalink()}`,
-      MultipleErrors.Result(
-        `Unable to decode state events in ${room.toPermalink()}`,
-        { errors }
-      )
-    );
+    if (errors.length > 0) {
+      log.error(
+        `There were multiple errors while decoding state events for ${room.toPermalink()}`,
+        MultipleErrors.Result(
+          `Unable to decode state events in ${room.toPermalink()}`,
+          { errors }
+        )
+      );
+    }
     return Ok(events);
   }
 
