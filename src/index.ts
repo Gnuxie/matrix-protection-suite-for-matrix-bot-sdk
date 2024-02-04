@@ -4,6 +4,8 @@ export * from './ClientManagement/RoomStateManagerFactory';
 
 export * from './Interface/MatrixData';
 
+export * from './Logging/BotSDKLogging';
+
 export * from './MatrixEmitter';
 
 export * from './PolicyList/PolicyListEditor';
