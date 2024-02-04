@@ -5,6 +5,7 @@
 
 import {
   ActionError,
+  ActionException,
   ActionExceptionKind,
   ActionResult,
   ClientsInRoomMap,
@@ -17,6 +18,7 @@ import {
   PolicyRoomManager,
   PolicyRoomRevisionIssuer,
   PolicyRuleType,
+  ResultError,
   RoomEvent,
   RoomMembershipManager,
   RoomMembershipRevisionIssuer,
@@ -179,6 +181,18 @@ export class RoomStateManagerFactory {
     );
   }
 
+  private requestingUserNotJoined(
+    clientUserID: StringUserID,
+    room: MatrixRoomID
+  ): ActionException {
+    const message = `The user ${clientUserID} is not joined to the room ${room.toPermalink()}`;
+    return new ActionException(
+      ActionExceptionKind.Unknown,
+      new Error(message),
+      message
+    );
+  }
+
   public async getRoomStateRevisionIssuer(
     room: MatrixRoomID,
     clientUserID: StringUserID
@@ -190,9 +204,7 @@ export class RoomStateManagerFactory {
         room
       );
     } else {
-      return ActionError.Result(
-        `The user ${clientUserID} is not joined to the room ${room.toPermalink()}`
-      );
+      return ResultError(this.requestingUserNotJoined(clientUserID, room));
     }
   }
 
@@ -211,9 +223,7 @@ export class RoomStateManagerFactory {
     if (this.clientsInRoomMap.isClientInRoom(clientUserID, roomID)) {
       return await this.policyRoomIssuers.getInstance(roomID, room);
     } else {
-      return ActionError.Result(
-        `The user ${clientUserID} is not joined to the room ${room.toPermalink()}`
-      );
+      return ResultError(this.requestingUserNotJoined(clientUserID, room));
     }
   }
 
@@ -243,9 +253,7 @@ export class RoomStateManagerFactory {
     if (this.clientsInRoomMap.isClientInRoom(clientUserID, roomID)) {
       return await this.roomMembershipIssuers.getInstance(roomID, room);
     } else {
-      return ActionError.Result(
-        `The user ${clientUserID} is not joined to the room ${room.toPermalink()}`
-      );
+      return ResultError(this.requestingUserNotJoined(clientUserID, room));
     }
   }
 
