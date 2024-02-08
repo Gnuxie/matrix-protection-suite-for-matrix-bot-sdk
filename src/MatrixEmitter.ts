@@ -145,10 +145,11 @@ function makeListenerWrapper(
     | 'room.archived',
   safeEmitter: SafeMatrixEmitter
 ) {
-  return function (roomId: string, mxEvent: unknown) {
+  return function (roomId: string, mxEvent: Record<string, unknown>) {
     if (!isStringRoomID(roomId)) {
       throw new TypeError(`Got a malformed room_id ${roomId}`);
     }
+    mxEvent['room_id'] = roomId;
     const decodeResult = decoder.decodeEvent(mxEvent);
     if (isError(decodeResult)) {
       log.error(
