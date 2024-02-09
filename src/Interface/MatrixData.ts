@@ -12,6 +12,7 @@ import {
   RoomStateRevisionIssuer,
   StateEvent,
   Value,
+  isError,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
 
@@ -45,17 +46,23 @@ export class BotSDKMatrixAccountData<T> implements MatrixAccountData<T> {
     );
   }
   public async storeAccountData(data: T): Promise<ActionResult<void>> {
-    return await this.client.setAccountData(this.eventType, data).then(
-      (_) => Ok(undefined),
-      (exception) =>
-        ActionException.Result(
-          `Unable to store matrix account data ${this.eventType}`,
-          {
-            exception,
-            exceptionKind: ActionExceptionKind.Unknown,
-          }
-        )
-    );
+    const encodeResult = Value.Encode(this.eventSchema, data);
+    if (isError(encodeResult)) {
+      return encodeResult;
+    }
+    return await this.client
+      .setAccountData(this.eventType, encodeResult.ok)
+      .then(
+        (_) => Ok(undefined),
+        (exception) =>
+          ActionException.Result(
+            `Unable to store matrix account data ${this.eventType}`,
+            {
+              exception,
+              exceptionKind: ActionExceptionKind.Unknown,
+            }
+          )
+      );
   }
 }
 
