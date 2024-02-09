@@ -48,6 +48,7 @@ import {
   StringRoomID,
   PolicyRuleType,
   StringUserID,
+  ClientsInRoomMap,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { BotSDKPolicyRoomEditor } from './PolicyListEditor';
@@ -73,7 +74,11 @@ export class BotSDKPolicyRoomManager implements PolicyRoomManager {
   public constructor(
     public readonly clientUserID: StringUserID,
     private readonly client: MatrixSendClient,
-    private readonly factory: RoomStateManagerFactory
+    private readonly factory: RoomStateManagerFactory,
+    private readonly joinPreempter: Pick<
+      ClientsInRoomMap,
+      'preemptTimelineJoin'
+    >
   ) {
     // nothing to do.
   }
@@ -149,7 +154,14 @@ export class BotSDKPolicyRoomManager implements PolicyRoomManager {
       );
     }
     return await this.client.createRoom(finalRoomCreateOptions).then(
-      (roomId) => Ok(new MatrixRoomID(roomId, [creator.domain])),
+      (roomId) => {
+        const room = new MatrixRoomID(roomId, [creator.domain]);
+        this.joinPreempter.preemptTimelineJoin(
+          this.clientUserID,
+          room.toRoomIDOrAlias()
+        );
+        return Ok(room);
+      },
       (exception) =>
         ActionException.Result(
           'Could not create a matrix room to serve as the new policy list.',

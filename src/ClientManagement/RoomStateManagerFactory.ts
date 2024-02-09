@@ -200,7 +200,9 @@ export class RoomStateManagerFactory {
     clientUserID: StringUserID
   ): Promise<ActionResult<RoomStateRevisionIssuer>> {
     const roomID = room.toRoomIDOrAlias();
-    if (this.clientsInRoomMap.isClientInRoom(clientUserID, roomID)) {
+    if (
+      this.clientsInRoomMap.isClientPreemptivelyInRoom(clientUserID, roomID)
+    ) {
       return await this.roomStateIssuers.getInstance(
         room.toRoomIDOrAlias(),
         room
@@ -222,7 +224,9 @@ export class RoomStateManagerFactory {
     clientUserID: StringUserID
   ): Promise<ActionResult<PolicyRoomRevisionIssuer>> {
     const roomID = room.toRoomIDOrAlias();
-    if (this.clientsInRoomMap.isClientInRoom(clientUserID, roomID)) {
+    if (
+      this.clientsInRoomMap.isClientPreemptivelyInRoom(clientUserID, roomID)
+    ) {
       return await this.policyRoomIssuers.getInstance(roomID, room);
     } else {
       return ResultError(this.requestingUserNotJoined(clientUserID, room));
@@ -244,7 +248,12 @@ export class RoomStateManagerFactory {
     clientUserID: StringUserID
   ): Promise<PolicyRoomManager> {
     const client = await this.clientProvider(clientUserID);
-    return new BotSDKPolicyRoomManager(clientUserID, client, this);
+    return new BotSDKPolicyRoomManager(
+      clientUserID,
+      client,
+      this,
+      this.clientsInRoomMap
+    );
   }
 
   public async getRoomMembershipRevisionIssuer(
@@ -252,7 +261,9 @@ export class RoomStateManagerFactory {
     clientUserID: StringUserID
   ): Promise<ActionResult<RoomMembershipRevisionIssuer>> {
     const roomID = room.toRoomIDOrAlias();
-    if (this.clientsInRoomMap.isClientInRoom(clientUserID, roomID)) {
+    if (
+      this.clientsInRoomMap.isClientPreemptivelyInRoom(clientUserID, roomID)
+    ) {
       return await this.roomMembershipIssuers.getInstance(roomID, room);
     } else {
       return ResultError(this.requestingUserNotJoined(clientUserID, room));
