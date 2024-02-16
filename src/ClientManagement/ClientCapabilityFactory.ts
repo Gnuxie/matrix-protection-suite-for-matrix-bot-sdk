@@ -3,13 +3,15 @@
 // SPDX-License-Identifier: AFL-3.0
 
 import {
+  ClientPlatform,
   ClientsInRoomMap,
-  RoomCreator,
-  RoomJoiner,
   StringUserID,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
-import { BotSDKAllClient } from '../Client/BotSDKAllClient';
+import {
+  BotSDKAllClient,
+  BotSDKClientPlatform,
+} from '../Client/BotSDKAllClient';
 
 /**
  * Creates client capabilities that reference a ClientsInRoomMap so that
@@ -20,16 +22,16 @@ export class ClientCapabilityFactory {
     // nothing to do.
   }
 
-  public makeAll(
+  public makeClientPlatform(
     clientUserID: StringUserID,
     client: MatrixSendClient
-  ): RoomJoiner & RoomCreator {
+  ): ClientPlatform {
     const clientRooms = this.clientsInRoomMap.getClientRooms(clientUserID);
     if (clientRooms === undefined) {
       throw new TypeError(
         `Cannot create a client for an untracked user ${clientUserID}`
       );
     }
-    return new BotSDKAllClient(client, clientRooms);
+    return new BotSDKClientPlatform(new BotSDKAllClient(client, clientRooms));
   }
 }

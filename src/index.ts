@@ -1,3 +1,6 @@
+export * from './Client/BotSDKAllClient';
+
+export * from './ClientManagement/ClientCapabilityFactory';
 export * from './ClientManagement/ClientManagement';
 export * from './ClientManagement/JoinedRoomsSafe';
 export * from './ClientManagement/RoomStateManagerFactory';

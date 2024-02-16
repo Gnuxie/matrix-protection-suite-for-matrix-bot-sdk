@@ -6,6 +6,7 @@ import {
   ActionException,
   ActionExceptionKind,
   ActionResult,
+  ClientPlatform,
   ClientRooms,
   MatrixException,
   MatrixRoomID,
@@ -14,6 +15,7 @@ import {
   RoomCreateOptions,
   RoomCreator,
   RoomJoiner,
+  RoomResolver,
   StringRoomAlias,
   StringRoomID,
   Value,
@@ -128,5 +130,20 @@ export class BotSDKAllClient implements RoomJoiner, RoomCreator {
         ])
       );
     }, resultifyBotSDKRequestError);
+  }
+}
+
+export class BotSDKClientPlatform implements ClientPlatform {
+  constructor(private readonly allClient: BotSDKAllClient) {
+    // nothing to do,
+  }
+  toRoomCreator(): RoomCreator {
+    return this.allClient;
+  }
+  toRoomJoiner(): RoomJoiner {
+    return this.allClient;
+  }
+  toRoomResolver(): RoomResolver {
+    return this.allClient;
   }
 }
