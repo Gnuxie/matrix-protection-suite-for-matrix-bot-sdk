@@ -39,6 +39,7 @@ import { ClientForUserID } from './ClientManagement';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { BotSDKRoomMembershipManager } from '../StateTracking/RoomMembershipManager';
 import { BotSDKPolicyRoomManager } from '../PolicyList/PolicyListManager';
+import { Redaction } from 'matrix-protection-suite/dist/MatrixTypes/Redaction';
 
 const log = new Logger('RoomStateManagerFactory');
 
@@ -298,7 +299,11 @@ export class RoomStateManagerFactory {
           'Somehow the has method for the interned instances is lying or the code is wrong'
         );
       }
-      issuer.updateForEvent(event);
+      if (event.type === 'm.room.redaction') {
+        issuer.updateForRedaction(event as Redaction);
+      } else {
+        issuer.updateForEvent(event as StateEvent);
+      }
     }
   }
 }
