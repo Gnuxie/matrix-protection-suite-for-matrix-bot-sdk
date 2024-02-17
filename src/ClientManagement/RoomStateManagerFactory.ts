@@ -4,6 +4,7 @@
  */
 
 import {
+  ALL_RULE_TYPES,
   ActionError,
   ActionException,
   ActionExceptionKind,
@@ -48,13 +49,16 @@ export class RoomStateManagerFactory {
     [MatrixRoomID]
   > = new InternedInstanceFactory(async (_roomID, room) => {
     const stateResult = await this.getRoomStateForRevisionIssuer(room);
+    // TODO: This entire class needs moving the MPS main via client capabilities.
+    //       so that it can be unit tested.
     if (isError(stateResult)) {
       return stateResult;
     }
     return Ok(
       new StandardRoomStateRevisionIssuer(
         room,
-        this.getRoomStateForRevisionIssuer
+        this.getRoomStateForRevisionIssuer,
+        stateResult.ok
       )
     );
   });
@@ -77,7 +81,11 @@ export class RoomStateManagerFactory {
     return Ok(
       new RoomStatePolicyRoomRevisionIssuer(
         room,
-        StandardPolicyRoomRevision.blankRevision(room),
+        StandardPolicyRoomRevision.blankRevision(room).reviseFromState(
+          roomStateIssuer.ok.currentRevision.getStateEventsOfTypes(
+            ALL_RULE_TYPES
+          )
+        ),
         roomStateIssuer.ok
       )
     );
@@ -98,7 +106,9 @@ export class RoomStateManagerFactory {
     return Ok(
       new RoomStateMembershipRevisionIssuer(
         room,
-        StandardRoomMembershipRevision.blankRevision(room),
+        StandardRoomMembershipRevision.blankRevision(room).reviseFromMembership(
+          stateIssuer.ok.currentRevision.getStateEventsOfType('m.room.member')
+        ),
         stateIssuer.ok
       )
     );
