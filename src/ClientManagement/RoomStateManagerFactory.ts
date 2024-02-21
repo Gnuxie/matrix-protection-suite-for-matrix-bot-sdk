@@ -41,6 +41,8 @@ import { MatrixSendClient } from '../MatrixEmitter';
 import { BotSDKRoomMembershipManager } from '../StateTracking/RoomMembershipManager';
 import { BotSDKPolicyRoomManager } from '../PolicyList/PolicyListManager';
 import { Redaction } from 'matrix-protection-suite/dist/MatrixTypes/Redaction';
+import { BotSDKClientPlatform } from '../Client/BotSDKClientPlatform';
+import { BotSDKBaseClient } from '../Client/BotSDKBaseClient';
 
 const log = new Logger('RoomStateManagerFactory');
 
@@ -269,9 +271,12 @@ export class RoomStateManagerFactory {
     clientUserID: StringUserID
   ): Promise<PolicyRoomManager> {
     const client = await this.clientProvider(clientUserID);
+    // FIXME: Shouldn't we have an equivalent of the clientProvider that
+    // gives us a clientPlatform? or one that gives both the platform and the client?
     return new BotSDKPolicyRoomManager(
       clientUserID,
       client,
+      new BotSDKClientPlatform(new BotSDKBaseClient(client, clientUserID)),
       this,
       this.clientsInRoomMap
     );

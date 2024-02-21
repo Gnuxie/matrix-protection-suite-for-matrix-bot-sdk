@@ -13,7 +13,6 @@ export * from './Logging/BotSDKLogging';
 
 export * from './MatrixEmitter';
 
-export * from './PolicyList/PolicyListEditor';
 export * from './PolicyList/PolicyListManager';
 
 export * from './Protection/MjolnirProtectedRoomsStore';

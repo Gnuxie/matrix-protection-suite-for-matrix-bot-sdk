@@ -49,9 +49,10 @@ import {
   PolicyRuleType,
   StringUserID,
   ClientsInRoomMap,
+  StandardPolicyRoomEditor,
+  ClientPlatform,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
-import { BotSDKPolicyRoomEditor } from './PolicyListEditor';
 import { RoomStateManagerFactory } from '../ClientManagement/RoomStateManagerFactory';
 
 export class BotSDKPolicyRoomManager implements PolicyRoomManager {
@@ -60,20 +61,29 @@ export class BotSDKPolicyRoomManager implements PolicyRoomManager {
     PolicyRoomEditor,
     [MatrixRoomID]
   >(async (_roomID, room) => {
-    const issuer = await this.factory.getPolicyRoomRevisionIssuer(
-      room,
-      this.clientUserID
-    );
-    if (isError(issuer)) {
-      return issuer;
+    const policyRoomRevisionIssuer =
+      await this.factory.getPolicyRoomRevisionIssuer(room, this.clientUserID);
+    if (isError(policyRoomRevisionIssuer)) {
+      return policyRoomRevisionIssuer;
     }
-    const editor = new BotSDKPolicyRoomEditor(this.client, room, issuer.ok);
+    const roomStateRevisionIssuer =
+      await this.factory.getRoomStateRevisionIssuer(room, this.clientUserID);
+    if (isError(roomStateRevisionIssuer)) {
+      return roomStateRevisionIssuer;
+    }
+    const editor = new StandardPolicyRoomEditor(
+      room,
+      policyRoomRevisionIssuer.ok,
+      roomStateRevisionIssuer.ok,
+      this.clientPlatform.toRoomStateEventSender()
+    );
     return Ok(editor);
   });
 
   public constructor(
     public readonly clientUserID: StringUserID,
     private readonly client: MatrixSendClient,
+    private readonly clientPlatform: ClientPlatform,
     private readonly factory: RoomStateManagerFactory,
     private readonly joinPreempter: Pick<
       ClientsInRoomMap,
