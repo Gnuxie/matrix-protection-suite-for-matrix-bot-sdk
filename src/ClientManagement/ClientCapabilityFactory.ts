@@ -8,10 +8,8 @@ import {
   StringUserID,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
-import {
-  BotSDKAllClient,
-  BotSDKClientPlatform,
-} from '../Client/BotSDKAllClient';
+import { BotSDKClientPlatform } from '../Client/BotSDKClientPlatform';
+import { BotSDKAllClient } from '../Client/BotSDKAllClient';
 
 /**
  * Creates client capabilities that reference a ClientsInRoomMap so that
