@@ -16,6 +16,7 @@ import {
   RoomCreator,
   RoomJoiner,
   RoomResolver,
+  StringEventID,
   StringRoomAlias,
   StringRoomID,
   Value,
@@ -24,32 +25,68 @@ import {
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { MatrixError } from 'matrix-bot-sdk';
-import { Type } from '@sinclair/typebox';
+import { StaticDecode, Type } from '@sinclair/typebox';
+import { RoomStateEventSender } from 'matrix-protection-suite/dist/Client/RoomStateEventSender';
 
 const WeakError = Type.Object({
   message: Type.String(),
   name: Type.String(),
 });
 
+function matrixExceptionFromMatrixError(
+  error: MatrixError
+): ActionResult<never, MatrixException> {
+  return MatrixException.R({
+    exception: error,
+    matrixErrorCode: error.errcode,
+    matrixErrorMessage: error.error,
+    message: error.message,
+  });
+}
+
+function actionExceptionFromWeakError(
+  error: StaticDecode<typeof WeakError>
+): ActionResult<never, ActionException> {
+  return ActionException.Result(error.message, {
+    exception: error,
+    exceptionKind: ActionExceptionKind.Unknown,
+  });
+}
+
+function unknownError(error: unknown): never {
+  throw new TypeError(
+    `What on earth are you throwing exactly? because it isn't an error ${error}`
+  );
+}
+
+// Either i'm really tired right now or stupid.
+// But I can't think of a way to share this definition with
+// `resultifyBotSDKRequestError` without having never | undefined
+// clients need to just have `never` when 404 isn't being checked!
+export function resultifyBotSDKRequestErrorWith404AsUndefined(
+  error: unknown
+): ActionResult<undefined, ActionException> {
+  if (error instanceof MatrixError) {
+    if (error.statusCode === 404) {
+      return Ok(undefined);
+    }
+    return matrixExceptionFromMatrixError(error);
+  } else if (Value.Check(WeakError, error)) {
+    return actionExceptionFromWeakError(error);
+  } else {
+    unknownError(error);
+  }
+}
+
 export function resultifyBotSDKRequestError(
   error: unknown
 ): ActionResult<never, ActionException> {
   if (error instanceof MatrixError) {
-    return MatrixException.R({
-      exception: error,
-      matrixErrorCode: error.errcode,
-      matrixErrorMessage: error.error,
-      message: error.message,
-    });
+    return matrixExceptionFromMatrixError(error);
   } else if (Value.Check(WeakError, error)) {
-    return ActionException.Result(error.message, {
-      exception: error,
-      exceptionKind: ActionExceptionKind.Unknown,
-    });
+    return actionExceptionFromWeakError(error);
   } else {
-    throw new TypeError(
-      `What on earth are you throwing exactly? because it isn't an error ${error}`
-    );
+    unknownError(error);
   }
 }
 
@@ -61,7 +98,9 @@ export function resultifyBotSDKRequestError(
  * a purpose built object system on top of JS and this is something that would
  * take time and consideration to do properly.
  */
-export class BotSDKAllClient implements RoomJoiner, RoomCreator {
+export class BotSDKAllClient
+  implements RoomJoiner, RoomCreator, RoomStateEventSender
+{
   public constructor(
     private readonly client: MatrixSendClient,
     private readonly clientRooms: ClientRooms
@@ -131,6 +170,21 @@ export class BotSDKAllClient implements RoomJoiner, RoomCreator {
       );
     }, resultifyBotSDKRequestError);
   }
+
+  public async sendStateEvent(
+    room: MatrixRoomID | StringRoomID,
+    stateType: string,
+    stateKey: string,
+    content: Record<string, unknown>
+  ): Promise<ActionResult<StringEventID>> {
+    const roomID = room instanceof MatrixRoomID ? room.toRoomIDOrAlias() : room;
+    return await this.client
+      .sendStateEvent(roomID, stateType, stateKey, content)
+      .then(
+        (eventID) => Ok(eventID as StringEventID),
+        resultifyBotSDKRequestError
+      );
+  }
 }
 
 export class BotSDKClientPlatform implements ClientPlatform {
@@ -144,6 +198,9 @@ export class BotSDKClientPlatform implements ClientPlatform {
     return this.allClient;
   }
   toRoomResolver(): RoomResolver {
+    return this.allClient;
+  }
+  toRoomStateEventSender(): RoomStateEventSender {
     return this.allClient;
   }
 }
