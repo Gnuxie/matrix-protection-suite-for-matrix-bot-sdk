@@ -12,9 +12,12 @@ import {
   MatrixRoomID,
   MatrixRoomReference,
   Ok,
+  RoomBanner,
   RoomCreateOptions,
   RoomCreator,
+  RoomEventRedacter,
   RoomJoiner,
+  RoomKicker,
   RoomStateEventSender,
   StringEventID,
   StringRoomAlias,
@@ -30,6 +33,10 @@ const WeakError = Type.Object({
   message: Type.String(),
   name: Type.String(),
 });
+
+function toRoomID(room: MatrixRoomID | StringRoomID): StringRoomID {
+  return typeof room === 'string' ? room : room.toRoomIDOrAlias();
+}
 
 function matrixExceptionFromMatrixError(
   error: MatrixError
@@ -89,7 +96,13 @@ export function resultifyBotSDKRequestError(
 }
 
 export class BotSDKBaseClient
-  implements RoomJoiner, RoomCreator, RoomStateEventSender
+  implements
+    RoomBanner,
+    RoomCreator,
+    RoomEventRedacter,
+    RoomJoiner,
+    RoomKicker,
+    RoomStateEventSender
 {
   public constructor(
     protected readonly client: MatrixSendClient,
@@ -163,6 +176,36 @@ export class BotSDKBaseClient
         ])
       );
     }, resultifyBotSDKRequestError);
+  }
+  public async banUser(
+    room: StringRoomID | MatrixRoomID,
+    userID: StringUserID,
+    reason?: string
+  ): Promise<ActionResult<void>> {
+    return await this.client
+      .banUser(userID, toRoomID(room), reason)
+      .then((_) => Ok(undefined), resultifyBotSDKRequestError);
+  }
+  public async kickUser(
+    room: StringRoomID | MatrixRoomID,
+    userID: StringUserID,
+    reason?: string
+  ): Promise<ActionResult<void>> {
+    return await this.client
+      .kickUser(userID, toRoomID(room), reason)
+      .then((_) => Ok(undefined), resultifyBotSDKRequestError);
+  }
+  public async redactEvent(
+    room: StringRoomID | MatrixRoomID,
+    eventID: StringEventID,
+    reason?: string
+  ): Promise<ActionResult<StringEventID>> {
+    return await this.client
+      .redactEvent(toRoomID(room), eventID, reason)
+      .then(
+        (redactionEventID) => Ok(redactionEventID as StringEventID),
+        resultifyBotSDKRequestError
+      );
   }
 
   public async sendStateEvent(
