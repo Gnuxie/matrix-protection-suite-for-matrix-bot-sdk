@@ -4,8 +4,11 @@
 
 import {
   ClientPlatform,
+  RoomBanner,
   RoomCreator,
+  RoomEventRedacter,
   RoomJoiner,
+  RoomKicker,
   RoomResolver,
   RoomStateEventSender,
 } from 'matrix-protection-suite';
@@ -14,6 +17,15 @@ import { BotSDKBaseClient } from './BotSDKBaseClient';
 export class BotSDKClientPlatform implements ClientPlatform {
   constructor(private readonly allClient: BotSDKBaseClient) {
     // nothing to do,
+  }
+  toRoomBanner(): RoomBanner {
+    return this.allClient;
+  }
+  toRoomEventRedacter(): RoomEventRedacter {
+    return this.allClient;
+  }
+  toRoomKicker(): RoomKicker {
+    return this.allClient;
   }
   toRoomCreator(): RoomCreator {
     return this.allClient;
