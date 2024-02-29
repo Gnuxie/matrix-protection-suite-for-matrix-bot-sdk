@@ -11,6 +11,7 @@ import {
   RoomKicker,
   RoomResolver,
   RoomStateEventSender,
+  RoomUnbanner,
 } from 'matrix-protection-suite';
 import { BotSDKBaseClient } from './BotSDKBaseClient';
 
@@ -37,6 +38,9 @@ export class BotSDKClientPlatform implements ClientPlatform {
     return this.allClient;
   }
   toRoomStateEventSender(): RoomStateEventSender {
+    return this.allClient;
+  }
+  toRoomUnbanner(): RoomUnbanner {
     return this.allClient;
   }
 }
