@@ -22,7 +22,7 @@ export async function resolveRoomReferenceSafe(
   }
   return await client.resolveRoom(roomRef.toRoomIDOrAlias()).then(
     (value) => Ok(new MatrixRoomID(value, roomRef.getViaServers())),
-    (exception) =>
+    (exception: unknown) =>
       ActionException.Result(
         `Failed to resolve the MatrixRoomReference ${roomRef.toPermalink()}`,
         {

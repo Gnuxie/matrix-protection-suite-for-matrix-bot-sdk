@@ -19,7 +19,7 @@ export function makeJoinedRoomsSafe(
   return () => {
     return client.getJoinedRooms().then(
       (rooms) => Ok(rooms as StringRoomID[]),
-      (exception) =>
+      (exception: unknown) =>
         ActionException.Result(
           `Unable to fetch the joined rooms for ${clientUserID}`,
           {

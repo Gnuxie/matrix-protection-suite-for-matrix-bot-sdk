@@ -35,8 +35,8 @@ async function getRoomMembershipEvents(
       )}/members`
     )
     .then(
-      (ok) => Ok(ok),
-      (exception) =>
+      (ok: unknown) => Ok(ok),
+      (exception: unknown) =>
         ActionException.Result(
           `Unable to query room members from ${room.toPermalink()}`,
           { exception, exceptionKind: ActionExceptionKind.Unknown }
@@ -45,19 +45,23 @@ async function getRoomMembershipEvents(
   if (isError(rawMembersResult)) {
     return rawMembersResult;
   }
-  if (
-    !('chunk' in rawMembersResult.ok) ||
-    !Array.isArray(rawMembersResult.ok['chunk'])
-  ) {
-    const message = `Unable parse the result of a /members query in ${room.toPermalink()}`;
-    log.error(message, rawMembersResult);
-    return ActionError.Result(message);
+  const errorMessage = `Unable parse the result of a /members query in ${room.toPermalink()}`;
+  const rawMembers = rawMembersResult.ok;
+  if (typeof rawMembers !== 'object' || rawMembers === null) {
+    return ActionError.Result(errorMessage);
+  }
+  if (!('chunk' in rawMembers) || !Array.isArray(rawMembers['chunk'])) {
+    log.error(errorMessage, rawMembersResult);
+    return ActionError.Result(errorMessage);
   }
   const members: MembershipEvent[] = [];
-  for (const rawEvent of rawMembersResult.ok['chunk']) {
+  for (const rawEvent of rawMembers['chunk']) {
     const memberResult = Value.Decode(MembershipEvent, rawEvent);
     if (isError(memberResult)) {
       log.error(
+        // Really we'd have something other than adhoc validation, generated from the OpenAPI Schema for the response
+        // we don't have that though....
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-member-access
         `Unable to parse the event ${rawEvent.event_id} from ${rawEvent.room_id}`,
         JSON.stringify(rawEvent),
         memberResult.error

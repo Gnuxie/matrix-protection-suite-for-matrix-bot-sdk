@@ -27,7 +27,7 @@ export class BotSDKMjolnirProtectedRoomsStore
   > {
     return this.client.getAccountData(MJOLNIR_PROTECTED_ROOMS_EVENT_TYPE).then(
       (value) => Value.Decode(MjolnirProtectedRoomsEvent, value),
-      (exception) =>
+      (exception: unknown) =>
         ActionException.Result(
           `Unable to load the account data for mjolnir protected_rooms`,
           { exception, exceptionKind: ActionExceptionKind.Unknown }
@@ -45,7 +45,7 @@ export class BotSDKMjolnirProtectedRoomsStore
       .setAccountData(MJOLNIR_PROTECTED_ROOMS_EVENT_TYPE, encodedData.ok)
       .then(
         (_value) => Ok(undefined),
-        (exception) =>
+        (exception: unknown) =>
           ActionException.Result(
             `Unable to set account data for mjolnir protected_rooms event`,
             { exception, exceptionKind: ActionExceptionKind.Unknown }

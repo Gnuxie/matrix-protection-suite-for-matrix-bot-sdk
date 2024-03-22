@@ -54,7 +54,7 @@ export class SynapseAdminClient {
     )}/admin`;
     const response = await this.client.doRequest('GET', endpoint).then(
       (value) => Ok(value),
-      (exception) =>
+      (exception: unknown) =>
         ActionException.Result(
           `Unable to query whether the user ${this.clientUserID} is a Synapse Admin`,
           { exception, exceptionKind: ActionExceptionKind.Unknown }
@@ -85,7 +85,7 @@ export class SynapseAdminClient {
       .doRequest('POST', endpoint, undefined, { erase })
       .then(
         (_) => Ok(undefined),
-        (exception) =>
+        (exception: unknown) =>
           ActionException.Result(
             `Unable to deactivate the user ${targetUserID}`,
             { exception, exceptionKind: ActionExceptionKind.Unknown }
@@ -106,7 +106,7 @@ export class SynapseAdminClient {
       })
       .then(
         (_) => Ok(undefined),
-        (exception) =>
+        (exception: unknown) =>
           ActionException.Result(`Unable to delete the room ${roomID}`, {
             exception,
             exceptionKind: ActionExceptionKind.Unknown,
@@ -132,7 +132,7 @@ export class SynapseAdminClient {
       })
       .then(
         (_) => Ok(undefined),
-        (exception) =>
+        (exception: unknown) =>
           ActionException.Result(
             `Unable to make the user ${userID} admin in room ${roomID}`,
             {

@@ -29,7 +29,7 @@ export class BotSDKMjolnirWatchedPolicyRoomsStore
       .getAccountData(MJOLNIR_WATCHED_POLICY_ROOMS_EVENT_TYPE)
       .then(
         (value) => Value.Decode(MjolnirWatchedPolicyRoomsEvent, value),
-        (exception) =>
+        (exception: unknown) =>
           ActionException.Result(
             `Unable to load the account data for mjolnir watched_lists`,
             { exception, exceptionKind: ActionExceptionKind.Unknown }
@@ -47,7 +47,7 @@ export class BotSDKMjolnirWatchedPolicyRoomsStore
       .setAccountData(MJOLNIR_WATCHED_POLICY_ROOMS_EVENT_TYPE, encodedData.ok)
       .then(
         (_value) => Ok(undefined),
-        (exception) =>
+        (exception: unknown) =>
           ActionException.Result(
             `Unable to set account data for mjolnir watched_lists`,
             { exception, exceptionKind: ActionExceptionKind.Unknown }

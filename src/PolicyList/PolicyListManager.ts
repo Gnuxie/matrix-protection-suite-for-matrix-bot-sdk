@@ -106,7 +106,7 @@ export class BotSDKPolicyRoomManager implements PolicyRoomManager {
   ): Promise<ActionResult<MatrixRoomID>> {
     const rawCreatorResult = await this.client.getUserId().then(
       (user) => Ok(user),
-      (exception) =>
+      (exception: unknown) =>
         ActionException.Result(
           'Could not create a list because we could not find the mxid of the list creator.',
           { exception, exceptionKind: ActionExceptionKind.Unknown }
@@ -172,7 +172,7 @@ export class BotSDKPolicyRoomManager implements PolicyRoomManager {
         );
         return Ok(room);
       },
-      (exception) =>
+      (exception: unknown) =>
         ActionException.Result(
           'Could not create a matrix room to serve as the new policy list.',
           { exception, exceptionKind: ActionExceptionKind.Unknown }
@@ -185,7 +185,7 @@ export class BotSDKPolicyRoomManager implements PolicyRoomManager {
   ): Promise<ActionResult<PolicyRuleEvent[]>> {
     return this.client.getRoomState(room.toRoomIDOrAlias()).then(
       (events) => Ok(events.filter(isPolicyRuleEvent)),
-      (exception) =>
+      (exception: unknown) =>
         ActionError.Result(
           `Could not fetch the room state for the policy list ${room.toPermalink()} and so we are unable to fetch any policy rules.`,
           { exception, exceptionKind: ActionExceptionKind.Unknown }

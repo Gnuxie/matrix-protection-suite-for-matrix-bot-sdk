@@ -10,7 +10,6 @@ import {
   MatrixStateData,
   Ok,
   RoomStateRevisionIssuer,
-  StateEvent,
   Value,
   isError,
 } from 'matrix-protection-suite';
@@ -54,7 +53,7 @@ export class BotSDKMatrixAccountData<T> implements MatrixAccountData<T> {
       .setAccountData(this.eventType, encodeResult.ok)
       .then(
         (_) => Ok(undefined),
-        (exception) =>
+        (exception: unknown) =>
           ActionException.Result(
             `Unable to store matrix account data ${this.eventType}`,
             {
@@ -78,7 +77,7 @@ export class BotSDKMatrixStateData<T> implements MatrixStateData<T> {
     const event = this.roomStateRevisionIssuer.currentRevision.getStateEvent(
       this.eventType,
       state_key
-    ) as StateEvent | undefined;
+    );
     return event?.content as T | undefined;
   }
   public async storeStateContent(
@@ -94,7 +93,7 @@ export class BotSDKMatrixStateData<T> implements MatrixStateData<T> {
       )
       .then(
         (_) => Ok(undefined),
-        (exception) =>
+        (exception: unknown) =>
           ActionException.Result(
             `Unable to store the matrix state data ${this.eventType}`,
             {

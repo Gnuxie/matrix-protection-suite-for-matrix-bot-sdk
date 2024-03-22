@@ -60,6 +60,8 @@ function actionExceptionFromWeakError(
 
 function unknownError(error: unknown): never {
   throw new TypeError(
+    // Not sure what to do yet other than throw?
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `What on earth are you throwing exactly? because it isn't an error ${error}`
   );
 }

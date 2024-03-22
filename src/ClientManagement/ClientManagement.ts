@@ -31,7 +31,7 @@ export async function joinedRoomsSafe(
 ): Promise<ActionResult<StringRoomID[]>> {
   return await client.getJoinedRooms().then(
     (rooms) => Ok(rooms as StringRoomID[]),
-    (exception) =>
+    (exception: unknown) =>
       ActionException.Result(`Unable to get joined rooms`, {
         exception,
         exceptionKind: ActionExceptionKind.Unknown,
