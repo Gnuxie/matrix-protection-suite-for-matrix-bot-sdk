@@ -24,6 +24,7 @@ import {
   RoomEvent,
   RoomMembershipManager,
   RoomMembershipRevisionIssuer,
+  RoomStateBackingStore,
   RoomStateManager,
   RoomStateMembershipRevisionIssuer,
   RoomStatePolicyRoomRevisionIssuer,
@@ -35,6 +36,7 @@ import {
   StringRoomID,
   StringUserID,
   isError,
+  isOk,
 } from 'matrix-protection-suite';
 import { ClientForUserID } from './ClientManagement';
 import { MatrixSendClient } from '../MatrixEmitter';
@@ -52,19 +54,39 @@ export class RoomStateManagerFactory {
     RoomStateRevisionIssuer,
     [MatrixRoomID]
   > = new InternedInstanceFactory(async (_roomID, room) => {
-    const stateResult = await this.getRoomStateForRevisionIssuer(room);
+    const getInitialRoomState = async () => {
+      if (this.roomStateBackingStore !== undefined) {
+        const storeResult = await this.roomStateBackingStore.getRoomState(
+          room.toRoomIDOrAlias()
+        );
+        if (isOk(storeResult)) {
+          if (storeResult.ok !== undefined) {
+            return Ok(storeResult.ok);
+          }
+        } else {
+          log.error(
+            `Could not load room state from the backing store`,
+            storeResult.error
+          );
+        }
+      }
+      return await this.getRoomStateForRevisionIssuer(room);
+    };
+    const stateResult = await getInitialRoomState();
     // TODO: This entire class needs moving the MPS main via client capabilities.
     //       so that it can be unit tested.
     if (isError(stateResult)) {
       return stateResult;
     }
-    return Ok(
-      new StandardRoomStateRevisionIssuer(
-        room,
-        this.getRoomStateForRevisionIssuer,
-        stateResult.ok
-      )
+    const issuer = new StandardRoomStateRevisionIssuer(
+      room,
+      this.getRoomStateForRevisionIssuer,
+      stateResult.ok
     );
+    if (this.roomStateBackingStore) {
+      issuer.on('revision', this.roomStateBackingStore.revisionListener);
+    }
+    return Ok(issuer);
   });
 
   private readonly getRoomStateForRevisionIssuer =
@@ -130,7 +152,8 @@ export class RoomStateManagerFactory {
   constructor(
     public readonly clientsInRoomMap: ClientsInRoomMap,
     private readonly clientProvider: ClientForUserID,
-    private readonly eventDecoder: EventDecoder
+    private readonly eventDecoder: EventDecoder,
+    private readonly roomStateBackingStore?: RoomStateBackingStore
   ) {
     // nothing to do.
   }
