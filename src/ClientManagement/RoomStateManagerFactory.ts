@@ -4,7 +4,6 @@
  */
 
 import {
-  ALL_RULE_TYPES,
   ActionError,
   ActionException,
   ActionExceptionKind,
@@ -19,7 +18,6 @@ import {
   PolicyRoomManager,
   PolicyRoomRevisionIssuer,
   PolicyRuleType,
-  PowerLevelsEvent,
   ResultError,
   RoomEvent,
   RoomMembershipManager,
@@ -104,23 +102,10 @@ export class RoomStateManagerFactory {
     if (isError(roomStateIssuer)) {
       return roomStateIssuer;
     }
-    const stateRevision = roomStateIssuer.ok.currentRevision;
-    const powerLevels = stateRevision.getStateEvent<PowerLevelsEvent>(
-      'm.room.power_levels',
-      ''
-    );
-    const policyRevision = ((revision) =>
-      powerLevels === undefined
-        ? revision
-        : revision.reviseFromPowerLevels(powerLevels))(
-      StandardPolicyRoomRevision.blankRevision(room).reviseFromState(
-        stateRevision.getStateEventsOfTypes(ALL_RULE_TYPES)
-      )
-    );
     return Ok(
       new RoomStatePolicyRoomRevisionIssuer(
         room,
-        policyRevision,
+        StandardPolicyRoomRevision.blankRevision(room),
         roomStateIssuer.ok
       )
     );
