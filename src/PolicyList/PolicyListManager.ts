@@ -30,7 +30,7 @@ import {
   ActionResult,
   MatrixRoomReference,
   POLICY_ROOM_TYPE,
-  SHORTCODE_EVENT_TYPE,
+  MJOLNIR_SHORTCODE_EVENT_TYPE,
   PolicyRoomManager,
   RoomCreateOptions,
   POLICY_ROOM_TYPE_VARIANTS,
@@ -145,7 +145,7 @@ export class BotSDKPolicyRoomManager implements PolicyRoomManager {
       invite,
       initial_state: [
         {
-          type: SHORTCODE_EVENT_TYPE,
+          type: MJOLNIR_SHORTCODE_EVENT_TYPE,
           state_key: '',
           content: { shortcode: shortcode },
         },
