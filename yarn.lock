@@ -2984,9 +2984,9 @@ kleur@^3.0.3:
   integrity sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==
 
 layerr@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/layerr/-/layerr-2.0.1.tgz#0c98e6f599de4f76b75c7a6522c54b8c6c591ff0"
-  integrity sha512-z0730CwG/JO24evdORnyDkwG1Q7b7mF2Tp1qRQ0YvrMMARbt1DFG694SOv439Gm7hYKolyZyaB49YIrYIfZBdg==
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/layerr/-/layerr-2.1.0.tgz#7b2aa335837b856fd25b3dd4fb44dc17d0785491"
+  integrity sha512-xDD9suWxfBYeXgqffRVH/Wqh+mqZrQcqPRn0I0ijl7iJQ7vu8gMGPt1Qop59pEW/jaIDNUN7+PX1Qk40+vuflg==
 
 leven@^3.1.0:
   version "3.1.0"
@@ -3161,10 +3161,10 @@ matrix-bot-sdk@>=0.6.4:
     request-promise "^4.2.6"
     sanitize-html "^2.8.0"
 
-"matrix-protection-suite@npm:@gnuxie/matrix-protection-suite@0.17.1":
-  version "0.17.1"
-  resolved "https://registry.yarnpkg.com/@gnuxie/matrix-protection-suite/-/matrix-protection-suite-0.17.1.tgz#7c4330a029461652d61d89ba5461c99324cfc3a1"
-  integrity sha512-3p9OqHf1JKymD1igceA5qy008Bqf9hSXC6mhPlLPqL7JGLFyE5FHa3eJcJJorZAfq54TH+KVmgpL0Es+E/wxfQ==
+"matrix-protection-suite@npm:@gnuxie/matrix-protection-suite@0.18.0":
+  version "0.18.0"
+  resolved "https://registry.yarnpkg.com/@gnuxie/matrix-protection-suite/-/matrix-protection-suite-0.18.0.tgz#68f7898974f7a60530926c4af83999680b95706b"
+  integrity sha512-3tCKGatmMkyKOfbnG+VSYqs59F2S2ttuptlMC6XpmAFfaSVuR2v7ThAXp3OCVAKUykG3EY+8ypnhmtsV0JuMsQ==
   dependencies:
     await-lock "^2.2.2"
     crypto-js "^4.1.1"
