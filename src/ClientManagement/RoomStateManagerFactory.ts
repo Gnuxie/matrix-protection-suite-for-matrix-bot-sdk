@@ -284,7 +284,9 @@ export class RoomStateManagerFactory {
     return new BotSDKPolicyRoomManager(
       clientUserID,
       client,
-      new BotSDKClientPlatform(new BotSDKBaseClient(client, clientUserID)),
+      new BotSDKClientPlatform(
+        new BotSDKBaseClient(client, clientUserID, this.eventDecoder)
+      ),
       this,
       this.clientsInRoomMap
     );

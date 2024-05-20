@@ -7,6 +7,7 @@ import {
   RoomBanner,
   RoomCreator,
   RoomEventRedacter,
+  RoomEventRelationsGetter,
   RoomJoiner,
   RoomKicker,
   RoomResolver,
@@ -23,6 +24,9 @@ export class BotSDKClientPlatform implements ClientPlatform {
     return this.allClient;
   }
   toRoomEventRedacter(): RoomEventRedacter {
+    return this.allClient;
+  }
+  toRoomEventRelationsGetter(): RoomEventRelationsGetter {
     return this.allClient;
   }
   toRoomKicker(): RoomKicker {

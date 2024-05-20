@@ -16,9 +16,11 @@ import {
   RoomCreateOptions,
   RoomCreator,
   RoomEventRedacter,
+  RoomEventRelationsGetter,
   RoomJoiner,
   RoomKicker,
   RoomStateEventSender,
+  PaginationError,
   StringEventID,
   StringRoomAlias,
   StringRoomID,
@@ -26,8 +28,14 @@ import {
   Value,
   isError,
   serverName,
+  RoomEvent,
+  doPagination,
+  EventDecoder,
+  RoomEventRelationsOptions,
+  StandardChunkPage,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
+import { getRelationsForEvent } from './PaginationAPIs';
 
 const WeakError = Type.Object({
   message: Type.String(),
@@ -102,13 +110,15 @@ export class BotSDKBaseClient
     RoomBanner,
     RoomCreator,
     RoomEventRedacter,
+    RoomEventRelationsGetter,
     RoomJoiner,
     RoomKicker,
     RoomStateEventSender
 {
   public constructor(
     protected readonly client: MatrixSendClient,
-    protected readonly clientUserID: StringUserID
+    protected readonly clientUserID: StringUserID,
+    protected readonly eventDecoder: EventDecoder
   ) {
     // nothing to do.
   }
@@ -208,6 +218,24 @@ export class BotSDKBaseClient
         (redactionEventID) => Ok(redactionEventID as StringEventID),
         resultifyBotSDKRequestError
       );
+  }
+  public async forEachRelation<ChunkItem = RoomEvent>(
+    roomID: StringRoomID,
+    eventID: StringEventID,
+    options: RoomEventRelationsOptions<ChunkItem>
+  ): Promise<ActionResult<void, PaginationError>> {
+    const startingPage = StandardChunkPage.createFirstPage<ChunkItem>(
+      async () =>
+        await getRelationsForEvent<ChunkItem>(
+          this.client,
+          this.eventDecoder,
+          roomID,
+          eventID,
+          options
+        ),
+      options
+    );
+    return await doPagination(startingPage, options);
   }
   public async unbanUser(
     room: StringRoomID | MatrixRoomID,

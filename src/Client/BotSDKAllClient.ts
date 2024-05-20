@@ -4,6 +4,7 @@
 
 import {
   ClientRooms,
+  EventDecoder,
   RoomCreator,
   RoomJoiner,
   RoomStateEventSender,
@@ -26,9 +27,10 @@ export class BotSDKAllClient
 {
   public constructor(
     client: MatrixSendClient,
-    private readonly clientRooms: ClientRooms
+    private readonly clientRooms: ClientRooms,
+    decoder: EventDecoder
   ) {
-    super(client, clientRooms.clientUserID);
+    super(client, clientRooms.clientUserID, decoder);
   }
 
   protected preemptTimelineJoin(roomID: StringRoomID): void {
