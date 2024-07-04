@@ -70,7 +70,7 @@ export class SynapseAdminClient {
     if (isError(decodedResult)) {
       return decodedResult;
     } else {
-      return Ok(decodedResult.ok?.admin ?? false);
+      return Ok(decodedResult.ok.admin ?? false);
     }
   }
 

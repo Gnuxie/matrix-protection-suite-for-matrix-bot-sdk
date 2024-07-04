@@ -61,7 +61,7 @@ async function getRoomMembershipEvents(
       log.error(
         // Really we'd have something other than adhoc validation, generated from the OpenAPI Schema for the response
         // we don't have that though....
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-member-access
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         `Unable to parse the event ${rawEvent.event_id} from ${rawEvent.room_id}`,
         JSON.stringify(rawEvent),
         memberResult.error
