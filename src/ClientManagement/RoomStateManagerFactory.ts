@@ -200,12 +200,12 @@ export class RoomStateManagerFactory {
     const managedClientsInRoom = this.clientsInRoomMap.getManagedUsersInRoom(
       room.toRoomIDOrAlias()
     );
-    if (managedClientsInRoom.length === 0) {
+    const chosenClientUserID = managedClientsInRoom[0];
+    if (chosenClientUserID === undefined) {
       return ActionError.Result(
         `There is no managed client in the room ${room.toPermalink()} and so we cannot fetch the room state there.`
       );
     }
-    const chosenClientUserID = managedClientsInRoom[0];
     const client = await this.clientProvider(chosenClientUserID);
     return await RoomStateManagerFactory.getRoomRoomState(
       client,
