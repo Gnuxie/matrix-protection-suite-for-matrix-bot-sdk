@@ -2329,9 +2329,9 @@ ignore@^5.2.0, ignore@^5.3.1:
   integrity sha512-5Fytz/IraMjqpwfd34ke28PTVMjZjJG2MPn5t7OE4eUCUNf8BAa7b5WUS9/Qvr6mwOQS7Mk6vdsMno5he+T8Xw==
 
 immutable@^5.0.0-beta.5:
-  version "5.0.0-beta.5"
-  resolved "https://registry.yarnpkg.com/immutable/-/immutable-5.0.0-beta.5.tgz#57dcaeadefae61ebc2d3feb6ea5b584a65282b61"
-  integrity sha512-1RO6wxfJdh/uyWb2MTn3RuCPXYmpRiAhoKm8vEnA50+2Gy0j++6GBtu5q6sq2d4tpcL+e1sCHzk8NkWnRhT2/Q==
+  version "5.0.0-rc.1"
+  resolved "https://registry.yarnpkg.com/immutable/-/immutable-5.0.0-rc.1.tgz#3011064998a575a70f17bf2ea4bc35394caec993"
+  integrity sha512-sW2Rt1jlDeEBTqHapJp6owkChOUwoHtbXhDHTa1tXJUl3WuLghuHaxjBZrL0Ih76awAdkcThu0m8QIXYU6nlrw==
 
 import-fresh@^3.2.1:
   version "3.3.0"
@@ -3151,10 +3151,10 @@ matrix-bot-sdk@>=0.6.4:
     request-promise "^4.2.6"
     sanitize-html "^2.8.0"
 
-"matrix-protection-suite@npm:@gnuxie/matrix-protection-suite@0.23.2":
-  version "0.23.2"
-  resolved "https://registry.yarnpkg.com/@gnuxie/matrix-protection-suite/-/matrix-protection-suite-0.23.2.tgz#f6c5bf2c29c5f4bbeb2f3e7809d488b0d74d0be5"
-  integrity sha512-8HJ5d4/fGxYGSVM/L4i/PFU7AjisAHpddX8Jg33vCTzxJuyAV1HIZkpOn1E8Q3732otGLzL/j8qdkIpiS+b7/Q==
+"matrix-protection-suite@npm:@gnuxie/matrix-protection-suite@0.23.3":
+  version "0.23.3"
+  resolved "https://registry.yarnpkg.com/@gnuxie/matrix-protection-suite/-/matrix-protection-suite-0.23.3.tgz#21396719215ca1a9698380104e72c9ad353f65ed"
+  integrity sha512-Xrlf2zZ6mS30TOv+joBhQR7I1B8xNvBslDZtfIcCKPhv7foSoBaVoVZVcpViBLikKa6wzgwqYoxdBKVTkUyykA==
   dependencies:
     await-lock "^2.2.2"
     crypto-js "^4.2.0"
