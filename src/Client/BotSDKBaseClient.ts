@@ -9,8 +9,6 @@ import {
   ActionExceptionKind,
   ActionResult,
   MatrixException,
-  MatrixRoomID,
-  MatrixRoomReference,
   Ok,
   RoomBanner,
   RoomCreateOptions,
@@ -21,13 +19,8 @@ import {
   RoomKicker,
   RoomStateEventSender,
   PaginationError,
-  StringEventID,
-  StringRoomAlias,
-  StringRoomID,
-  StringUserID,
   Value,
   isError,
-  serverName,
   RoomEvent,
   doPagination,
   EventDecoder,
@@ -36,6 +29,15 @@ import {
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { getRelationsForEvent } from './PaginationAPIs';
+import {
+  MatrixRoomID,
+  StringRoomID,
+  StringUserID,
+  MatrixRoomReference,
+  StringRoomAlias,
+  StringEventID,
+  userServerName,
+} from '@the-draupnir-project/matrix-basic-types';
 
 const WeakError = Type.Object({
   message: Type.String(),
@@ -184,7 +186,7 @@ export class BotSDKBaseClient
       this.preemptTimelineJoin(roomID as StringRoomID);
       return Ok(
         MatrixRoomReference.fromRoomID(roomID as StringRoomID, [
-          serverName(this.clientUserID),
+          userServerName(this.clientUserID),
         ])
       );
     }, resultifyBotSDKRequestError);

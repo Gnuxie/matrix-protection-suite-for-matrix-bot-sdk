@@ -28,14 +28,11 @@ limitations under the License.
 import {
   ActionError,
   ActionResult,
-  MatrixRoomReference,
   POLICY_ROOM_TYPE,
   MJOLNIR_SHORTCODE_EVENT_TYPE,
   PolicyRoomManager,
   RoomCreateOptions,
   POLICY_ROOM_TYPE_VARIANTS,
-  UserID,
-  MatrixRoomID,
   ActionException,
   ActionExceptionKind,
   Ok,
@@ -45,15 +42,20 @@ import {
   PolicyRoomEditor,
   InternedInstanceFactory,
   PolicyRoomRevisionIssuer,
-  StringRoomID,
   PolicyRuleType,
-  StringUserID,
   ClientsInRoomMap,
   StandardPolicyRoomEditor,
   ClientPlatform,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { RoomStateManagerFactory } from '../ClientManagement/RoomStateManagerFactory';
+import {
+  StringRoomID,
+  MatrixRoomID,
+  StringUserID,
+  MatrixRoomReference,
+  MatrixUserID,
+} from '@the-draupnir-project/matrix-basic-types';
 
 export class BotSDKPolicyRoomManager implements PolicyRoomManager {
   private readonly issuedEditors = new InternedInstanceFactory<
@@ -115,7 +117,7 @@ export class BotSDKPolicyRoomManager implements PolicyRoomManager {
     if (isError(rawCreatorResult)) {
       return rawCreatorResult;
     }
-    const creator = new UserID(rawCreatorResult.ok);
+    const creator = new MatrixUserID(rawCreatorResult.ok as StringUserID);
     const powerLevels: RoomCreateOptions['power_level_content_override'] = {
       ban: 50,
       events: {
@@ -165,7 +167,7 @@ export class BotSDKPolicyRoomManager implements PolicyRoomManager {
     }
     return await this.client.createRoom(finalRoomCreateOptions).then(
       (roomId) => {
-        const room = new MatrixRoomID(roomId, [creator.domain]);
+        const room = new MatrixRoomID(roomId, [creator.serverName]);
         this.joinPreempter.preemptTimelineJoin(
           this.clientUserID,
           room.toRoomIDOrAlias()

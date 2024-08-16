@@ -30,8 +30,6 @@ import {
   ActionExceptionKind,
   ActionResult,
   Ok,
-  StringRoomID,
-  StringUserID,
   SynapseAdminDeleteRoomRequest,
   SynapseAdminGetUserAdminResponse,
   SynapseAdminPostUserDeactivateRequest,
@@ -39,6 +37,10 @@ import {
   isError,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
+import {
+  StringRoomID,
+  StringUserID,
+} from '@the-draupnir-project/matrix-basic-types';
 
 export class SynapseAdminClient {
   constructor(

@@ -1,7 +1,5 @@
 import {
   EventDecoder,
-  StringRoomID,
-  StringEventID,
   RoomEventRelationsOptions,
   ActionResult,
   Value,
@@ -13,6 +11,10 @@ import {
   PaginatedResponse,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
+import {
+  StringEventID,
+  StringRoomID,
+} from '@the-draupnir-project/matrix-basic-types';
 
 export async function getRelationsForEvent<ChunkItem>(
   client: MatrixSendClient,

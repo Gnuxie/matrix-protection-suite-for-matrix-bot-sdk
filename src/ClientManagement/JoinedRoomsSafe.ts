@@ -8,9 +8,9 @@ import {
   ActionExceptionKind,
   JoinedRoomsSafe,
   Ok,
-  StringRoomID,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
+import { StringRoomID } from '@the-draupnir-project/matrix-basic-types';
 
 export function makeJoinedRoomsSafe(
   client: MatrixSendClient,

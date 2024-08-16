@@ -9,17 +9,19 @@ import {
   ActionExceptionKind,
   ActionResult,
   Logger,
-  MatrixRoomID,
   Ok,
   RoomMembershipManager,
   RoomMembershipRevisionIssuer,
-  StringUserID,
   Value,
   isError,
 } from 'matrix-protection-suite';
 import { MembershipEvent } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { RoomStateManagerFactory } from '../ClientManagement/RoomStateManagerFactory';
+import {
+  MatrixRoomID,
+  StringUserID,
+} from '@the-draupnir-project/matrix-basic-types';
 
 const log = new Logger('BotSDKRoomMembershipManager');
 

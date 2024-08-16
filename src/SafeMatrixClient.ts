@@ -7,11 +7,13 @@ import {
   ActionException,
   ActionExceptionKind,
   ActionResult,
-  MatrixRoomID,
-  MatrixRoomReference,
   Ok,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from './MatrixEmitter';
+import {
+  MatrixRoomReference,
+  MatrixRoomID,
+} from '@the-draupnir-project/matrix-basic-types';
 
 export async function resolveRoomReferenceSafe(
   client: MatrixSendClient,

@@ -6,11 +6,11 @@ import {
   ClientPlatform,
   ClientsInRoomMap,
   EventDecoder,
-  StringUserID,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { BotSDKClientPlatform } from '../Client/BotSDKClientPlatform';
 import { BotSDKAllClient } from '../Client/BotSDKAllClient';
+import { StringUserID } from '@the-draupnir-project/matrix-basic-types';
 
 /**
  * Creates client capabilities that reference a ClientsInRoomMap so that

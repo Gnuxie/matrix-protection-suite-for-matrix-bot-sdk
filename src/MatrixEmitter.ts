@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unified-signatures */
 /**
  * Copyright (C) 2022 Gnuxie <Gnuxie@protonmail.com>
  * All rights reserved.
@@ -25,12 +26,14 @@ limitations under the License.
  * are NOT distributed, contributed, committed, or licensed under the Apache License.
  */
 
+import {
+  StringRoomID,
+  isStringRoomID,
+} from '@the-draupnir-project/matrix-basic-types';
 import EventEmitter from 'events';
 import { MatrixClient } from 'matrix-bot-sdk';
 import {
   MembershipEvent,
-  StringRoomID,
-  isStringRoomID,
   EventDecoder,
   isError,
   Logger,

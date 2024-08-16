@@ -12,7 +12,6 @@ import {
   EventDecoder,
   InternedInstanceFactory,
   Logger,
-  MatrixRoomID,
   MultipleErrors,
   Ok,
   PolicyRoomManager,
@@ -31,8 +30,6 @@ import {
   StandardRoomMembershipRevision,
   StandardRoomStateRevisionIssuer,
   StateEvent,
-  StringRoomID,
-  StringUserID,
   isError,
   isOk,
 } from 'matrix-protection-suite';
@@ -43,6 +40,11 @@ import { BotSDKPolicyRoomManager } from '../PolicyList/PolicyListManager';
 import { Redaction } from 'matrix-protection-suite/dist/MatrixTypes/Redaction';
 import { BotSDKClientPlatform } from '../Client/BotSDKClientPlatform';
 import { BotSDKBaseClient } from '../Client/BotSDKBaseClient';
+import {
+  StringRoomID,
+  MatrixRoomID,
+  StringUserID,
+} from '@the-draupnir-project/matrix-basic-types';
 
 const log = new Logger('RoomStateManagerFactory');
 

@@ -10,10 +10,12 @@ import {
   ClientRooms,
   ClientsInRoomMap,
   Ok,
-  StringRoomID,
-  StringUserID,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
+import {
+  StringRoomID,
+  StringUserID,
+} from '@the-draupnir-project/matrix-basic-types';
 
 export type ClientForUserID = (
   clientUserID: StringUserID

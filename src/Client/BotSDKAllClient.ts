@@ -8,10 +8,10 @@ import {
   RoomCreator,
   RoomJoiner,
   RoomStateEventSender,
-  StringRoomID,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { BotSDKBaseClient } from './BotSDKBaseClient';
+import { StringRoomID } from '@the-draupnir-project/matrix-basic-types';
 
 /**
  * This is a client that implements all granular capabilities specified in the
