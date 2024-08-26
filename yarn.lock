@@ -3164,10 +3164,10 @@ matrix-bot-sdk@>=0.6.4:
     request-promise "^4.2.6"
     sanitize-html "^2.8.0"
 
-"matrix-protection-suite@npm:@gnuxie/matrix-protection-suite@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@gnuxie/matrix-protection-suite/-/matrix-protection-suite-1.0.0.tgz#7e1eb2cd5df818c736d83b217998b77dc9667160"
-  integrity sha512-XoNRzJnRgU0qgdHhId2IMvrnvaW7jx884DEh/3NssKv0Bmyccbr0DBAq7aNbXWO2T0L88aYyPENYL+j9oZKmuQ==
+"matrix-protection-suite@npm:@gnuxie/matrix-protection-suite@1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@gnuxie/matrix-protection-suite/-/matrix-protection-suite-1.1.0.tgz#7cbff6dc52870c4eaf24ec783dd8c95a14a20331"
+  integrity sha512-vGwj3aN+3M2+1LNpfHGi1ULJxVbZ87WISE0ULVqAlUXSz0Vv9j2Gb1uXoU4naO2By7dcJzQIzYdRVywthkOTYQ==
   dependencies:
     "@gnuxie/typescript-result" "^0.2.0"
     await-lock "^2.2.2"
@@ -4215,9 +4215,9 @@ uc.micro@^2.0.0, uc.micro@^2.1.0:
   integrity sha512-ARDJmphmdvUk6Glw7y9DQ2bFkKBHwQHLi2lsaH6PPmz/Ka9sFOBsBluozhDltWmnv9u/cF6Rt87znRTPV+yp/A==
 
 ulidx@^2.3.0:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/ulidx/-/ulidx-2.4.0.tgz#9d56b16925b6403019005e63b3b5b3a61d94f3ee"
-  integrity sha512-iTZHiSCrIZeXvbJ34qCSBO4fmwf4GRzkv3hb7adB+00nyJKCwVFK0xw2gXGNfJsIFfET7Av+OP8/rsxxJHRSVQ==
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/ulidx/-/ulidx-2.4.1.tgz#c0f60f0552f84d115d42fd52a306033f13404c55"
+  integrity sha512-xY7c8LPyzvhvew0Fn+Ek3wBC9STZAuDI/Y5andCKi9AX6/jvfaX45PhsDX8oxgPL0YFp0Jhr8qWMbS/p9375Xg==
   dependencies:
     layerr "^3.0.0"
 
