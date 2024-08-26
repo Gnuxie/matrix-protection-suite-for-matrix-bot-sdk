@@ -26,6 +26,8 @@ import {
   EventDecoder,
   RoomEventRelationsOptions,
   StandardChunkPage,
+  RoomMessageSender,
+  MessageContent,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { getRelationsForEvent } from './PaginationAPIs';
@@ -115,6 +117,7 @@ export class BotSDKBaseClient
     RoomEventRelationsGetter,
     RoomJoiner,
     RoomKicker,
+    RoomMessageSender,
     RoomStateEventSender
 {
   public constructor(
@@ -127,6 +130,18 @@ export class BotSDKBaseClient
 
   protected preemptTimelineJoin(_roomID: StringRoomID): void {
     // nothing to do.
+  }
+
+  public async sendMessage<TContent extends MessageContent>(
+    roomID: StringRoomID,
+    content: TContent
+  ): Promise<ActionResult<StringEventID>> {
+    return await this.client
+      .sendMessage(roomID, content)
+      .then(
+        (eventID) => Ok(eventID as StringEventID),
+        resultifyBotSDKRequestError
+      );
   }
 
   public async resolveRoom(

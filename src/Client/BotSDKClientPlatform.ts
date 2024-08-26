@@ -10,6 +10,7 @@ import {
   RoomEventRelationsGetter,
   RoomJoiner,
   RoomKicker,
+  RoomMessageSender,
   RoomResolver,
   RoomStateEventSender,
   RoomUnbanner,
@@ -45,6 +46,9 @@ export class BotSDKClientPlatform implements ClientPlatform {
     return this.allClient;
   }
   toRoomUnbanner(): RoomUnbanner {
+    return this.allClient;
+  }
+  toRoomMessageSender(): RoomMessageSender {
     return this.allClient;
   }
 }
