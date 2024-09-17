@@ -281,13 +281,22 @@ export class RoomStateManagerFactory {
     clientUserID: StringUserID
   ): Promise<PolicyRoomManager> {
     const client = await this.clientProvider(clientUserID);
+    const clientRooms = this.clientsInRoomMap.getClientRooms(clientUserID);
+    if (clientRooms === undefined) {
+      throw new TypeError(`Cannot find clientRooms for ${clientUserID}`);
+    }
     // FIXME: Shouldn't we have an equivalent of the clientProvider that
     // gives us a clientPlatform? or one that gives both the platform and the client?
     return new BotSDKPolicyRoomManager(
       clientUserID,
       client,
       new BotSDKClientPlatform(
-        new BotSDKBaseClient(client, clientUserID, this.eventDecoder)
+        new BotSDKBaseClient(
+          client,
+          clientUserID,
+          clientRooms,
+          this.eventDecoder
+        )
       ),
       this,
       this.clientsInRoomMap

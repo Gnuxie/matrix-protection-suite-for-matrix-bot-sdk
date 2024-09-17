@@ -27,10 +27,10 @@ export class BotSDKAllClient
 {
   public constructor(
     client: MatrixSendClient,
-    private readonly clientRooms: ClientRooms,
+    clientRooms: ClientRooms,
     decoder: EventDecoder
   ) {
-    super(client, clientRooms.clientUserID, decoder);
+    super(client, clientRooms.clientUserID, clientRooms, decoder);
   }
 
   protected preemptTimelineJoin(roomID: StringRoomID): void {

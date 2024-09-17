@@ -28,6 +28,7 @@ import {
   StandardChunkPage,
   RoomMessageSender,
   MessageContent,
+  ClientRooms,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { getRelationsForEvent } from './PaginationAPIs';
@@ -123,6 +124,7 @@ export class BotSDKBaseClient
   public constructor(
     protected readonly client: MatrixSendClient,
     protected readonly clientUserID: StringUserID,
+    protected readonly clientRooms: ClientRooms,
     protected readonly eventDecoder: EventDecoder
   ) {
     // nothing to do.
@@ -172,10 +174,18 @@ export class BotSDKBaseClient
   }
 
   public async joinRoom(
-    room: MatrixRoomReference | StringRoomID | StringRoomAlias
+    room: MatrixRoomReference | StringRoomID | StringRoomAlias,
+    rawOptions?: { alwaysCallJoin?: boolean }
   ): Promise<ActionResult<MatrixRoomID>> {
+    const alwaysCallJoin = rawOptions?.alwaysCallJoin ?? false;
     const resolvedReference = await this.resolveRoom(room);
     if (isError(resolvedReference)) {
+      return resolvedReference;
+    }
+    if (
+      !alwaysCallJoin &&
+      this.clientRooms.isJoinedRoom(resolvedReference.ok.toRoomIDOrAlias())
+    ) {
       return resolvedReference;
     }
     return await this.client
