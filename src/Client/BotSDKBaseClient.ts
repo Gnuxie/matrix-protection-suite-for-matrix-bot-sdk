@@ -79,6 +79,15 @@ function unknownError(error: unknown): never {
   );
 }
 
+export function is404(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'statusCode' in error &&
+    error.statusCode === 404
+  );
+}
+
 // Either i'm really tired right now or stupid.
 // But I can't think of a way to share this definition with
 // `resultifyBotSDKRequestError` without having never | undefined
@@ -86,10 +95,10 @@ function unknownError(error: unknown): never {
 export function resultifyBotSDKRequestErrorWith404AsUndefined(
   error: unknown
 ): ActionResult<undefined, ActionException> {
+  if (is404(error)) {
+    return Ok(undefined);
+  }
   if (error instanceof MatrixError) {
-    if (error.statusCode === 404) {
-      return Ok(undefined);
-    }
     return matrixExceptionFromMatrixError(error);
   } else if (Value.Check(WeakError, error)) {
     return actionExceptionFromWeakError(error);

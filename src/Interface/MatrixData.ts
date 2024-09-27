@@ -9,19 +9,55 @@ import {
   MatrixAccountData,
   MatrixStateData,
   Ok,
+  PersistentConfigBackend,
   RoomStateRevisionIssuer,
   Value,
   isError,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
+import {
+  is404,
+  resultifyBotSDKRequestError,
+  resultifyBotSDKRequestErrorWith404AsUndefined,
+} from '../Client/BotSDKBaseClient';
 
-function is404(error: unknown): boolean {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'statusCode' in error &&
-    error.statusCode === 404
-  );
+export class BotSDKAccountDataConfigBackend<T>
+  implements PersistentConfigBackend<T>
+{
+  constructor(
+    private readonly client: MatrixSendClient,
+    private readonly eventType: string,
+    private readonly eventSchema: Parameters<(typeof Value)['Decode']>[0]
+  ) {
+    // nothing to do.
+  }
+
+  public async requestConfig(): Promise<
+    ActionResult<Record<string, unknown> | undefined>
+  > {
+    return await this.client
+      .getAccountData(this.eventType)
+      .then(
+        (data) => Ok(data as Record<string, undefined>),
+        resultifyBotSDKRequestErrorWith404AsUndefined
+      );
+  }
+  public async saveConfig(data: T): Promise<ActionResult<void>> {
+    const encodeData = Value.Encode(this.eventSchema, data);
+    if (isError(encodeData)) {
+      return encodeData;
+    }
+    return await this.client
+      .setAccountData(this.eventType, encodeData.ok)
+      .then((_) => Ok(undefined), resultifyBotSDKRequestError);
+  }
+  public async saveUnparsedConfig(
+    data: Record<string, unknown>
+  ): Promise<ActionResult<void>> {
+    return await this.client
+      .setAccountData(this.eventType, data)
+      .then((_) => Ok(undefined), resultifyBotSDKRequestError);
+  }
 }
 
 export class BotSDKMatrixAccountData<T> implements MatrixAccountData<T> {
