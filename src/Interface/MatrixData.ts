@@ -21,13 +21,13 @@ import {
   resultifyBotSDKRequestErrorWith404AsUndefined,
 } from '../Client/BotSDKBaseClient';
 
-export class BotSDKAccountDataConfigBackend<T>
-  implements PersistentConfigBackend<T>
+export class BotSDKAccountDataConfigBackend<
+  TEncodedShape extends Record<string, unknown> = Record<string, unknown>
+> implements PersistentConfigBackend<TEncodedShape>
 {
   constructor(
     private readonly client: MatrixSendClient,
-    private readonly eventType: string,
-    private readonly eventSchema: Parameters<(typeof Value)['Decode']>[0]
+    private readonly eventType: string
   ) {
     // nothing to do.
   }
@@ -42,13 +42,11 @@ export class BotSDKAccountDataConfigBackend<T>
         resultifyBotSDKRequestErrorWith404AsUndefined
       );
   }
-  public async saveConfig(data: T): Promise<ActionResult<void>> {
-    const encodeData = Value.Encode(this.eventSchema, data);
-    if (isError(encodeData)) {
-      return encodeData;
-    }
+  public async saveEncodedConfig(
+    data: TEncodedShape
+  ): Promise<ActionResult<void>> {
     return await this.client
-      .setAccountData(this.eventType, encodeData.ok)
+      .setAccountData(this.eventType, data)
       .then((_) => Ok(undefined), resultifyBotSDKRequestError);
   }
   public async saveUnparsedConfig(
