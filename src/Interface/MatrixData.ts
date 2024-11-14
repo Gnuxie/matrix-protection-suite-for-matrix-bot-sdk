@@ -20,6 +20,7 @@ import {
   resultifyBotSDKRequestError,
   resultifyBotSDKRequestErrorWith404AsUndefined,
 } from '../Client/BotSDKBaseClient';
+import { StringRoomID } from '@the-draupnir-project/matrix-basic-types';
 
 export class BotSDKAccountDataConfigBackend<
   TEncodedShape extends Record<string, unknown> = Record<string, unknown>
@@ -96,6 +97,37 @@ export class BotSDKMatrixAccountData<T> implements MatrixAccountData<T> {
             }
           )
       );
+  }
+}
+
+export class BotSDKRoomStateConfigBackend<
+  TEncodedShape extends Record<string, unknown> = Record<string, unknown>
+> implements PersistentConfigBackend<TEncodedShape>
+{
+  constructor(
+    private readonly client: MatrixSendClient,
+    private readonly roomID: StringRoomID,
+    private readonly eventType: string,
+    private readonly stateKey: string
+  ) {
+    // nothing to do.
+  }
+  public async requestConfig(): Promise<
+    ActionResult<Record<string, unknown> | undefined>
+  > {
+    return await this.client
+      .getRoomStateEvent(this.roomID, this.eventType, this.stateKey)
+      .then(
+        (data) => Ok(data as Record<string, undefined>),
+        resultifyBotSDKRequestErrorWith404AsUndefined
+      );
+  }
+  public async saveEncodedConfig(
+    data: TEncodedShape
+  ): Promise<ActionResult<void>> {
+    return await this.client
+      .sendStateEvent(this.roomID, this.eventType, this.stateKey, data)
+      .then((_) => Ok(undefined), resultifyBotSDKRequestError);
   }
 }
 
