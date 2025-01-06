@@ -3164,10 +3164,10 @@ matrix-bot-sdk@>=0.6.4:
     request-promise "^4.2.6"
     sanitize-html "^2.8.0"
 
-"matrix-protection-suite@npm:@gnuxie/matrix-protection-suite@2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@gnuxie/matrix-protection-suite/-/matrix-protection-suite-2.1.1.tgz#82ca4ae80d400c51fb232c6ab1fb26782ba7d006"
-  integrity sha512-fIYw1LSBtqiNsGYA4OMxieeDmED4uGKPqBE2p4D7xW7d8RlgDSrmxUGrddSqiCcJKYjwKmy5V4c7YOpusIioHg==
+"matrix-protection-suite@npm:@gnuxie/matrix-protection-suite@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@gnuxie/matrix-protection-suite/-/matrix-protection-suite-2.2.0.tgz#53aaa11159abcc5f79225b47da36dff0110e1ffb"
+  integrity sha512-w7a61RUeMcRBaXJF86g6W/hxycJ7o5thEm1SKkgoErrh4bWEivXL6zXn057j7I/hsvXolgXMsAIXpkHFajzjsQ==
   dependencies:
     "@gnuxie/typescript-result" "^1.0.0"
     await-lock "^2.2.2"
