@@ -33,7 +33,7 @@ export async function resolveRoomReferenceSafe(
   return await client
     .doRequest(
       'GET',
-      `/_matrix/client/v3/directory/${encodeURIComponent(
+      `/_matrix/client/v3/directory/room/${encodeURIComponent(
         roomRef.toRoomIDOrAlias()
       )}`
     )
