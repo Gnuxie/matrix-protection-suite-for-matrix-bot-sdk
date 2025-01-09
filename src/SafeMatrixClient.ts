@@ -1,36 +1,47 @@
 /**
- * Copyright (C) 2023 Gnuxie <Gnuxie@protonmail.com>
+ * Copyright (C) 2023, 2025 Gnuxie <Gnuxie@protonmail.com>
  * All rights reserved.
  */
 
 import {
-  ActionException,
-  ActionExceptionKind,
-  ActionResult,
+  isError,
   Ok,
+  StringRoomIDSchema,
+  Value,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from './MatrixEmitter';
 import {
   MatrixRoomReference,
   MatrixRoomID,
 } from '@the-draupnir-project/matrix-basic-types';
+import { Type } from '@sinclair/typebox';
+import { resultifyBotSDKRequestError } from './Client/BotSDKBaseClient';
+import { Result } from '@gnuxie/typescript-result';
+
+const RoomResolveResponse = Type.Object({
+  room_id: StringRoomIDSchema,
+  servers: Type.Array(Type.String()),
+});
 
 export async function resolveRoomReferenceSafe(
   client: MatrixSendClient,
   roomRef: MatrixRoomReference
-): Promise<ActionResult<MatrixRoomID>> {
+): Promise<Result<MatrixRoomID>> {
   if (roomRef instanceof MatrixRoomID) {
     return Ok(roomRef);
   }
-  return await client.resolveRoom(roomRef.toRoomIDOrAlias()).then(
-    (value) => Ok(new MatrixRoomID(value, roomRef.getViaServers())),
-    (exception: unknown) =>
-      ActionException.Result(
-        `Failed to resolve the MatrixRoomReference ${roomRef.toPermalink()}`,
-        {
-          exception,
-          exceptionKind: ActionExceptionKind.Unknown,
-        }
-      )
-  );
+  return await client
+    .doRequest(
+      'GET',
+      `/_matrix/client/v3/directory/${encodeURIComponent(
+        roomRef.toRoomIDOrAlias()
+      )}`
+    )
+    .then((value) => {
+      const response = Value.Decode(RoomResolveResponse, value);
+      if (isError(response)) {
+        return response;
+      }
+      return Ok(new MatrixRoomID(response.ok.room_id, response.ok.servers));
+    }, resultifyBotSDKRequestError);
 }

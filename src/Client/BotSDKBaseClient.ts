@@ -41,6 +41,7 @@ import {
   StringEventID,
   userServerName,
 } from '@the-draupnir-project/matrix-basic-types';
+import { resolveRoomReferenceSafe } from '../SafeMatrixClient';
 
 const WeakError = Type.Object({
   message: Type.String(),
@@ -165,21 +166,7 @@ export class BotSDKBaseClient
         return room;
       }
     })();
-    if (roomReference instanceof MatrixRoomID) {
-      return Ok(roomReference);
-    }
-    return await this.client
-      .resolveRoom(roomReference.toRoomIDOrAlias())
-      .then(
-        (roomID) =>
-          Ok(
-            MatrixRoomReference.fromRoomID(
-              roomID as StringRoomID,
-              roomReference.getViaServers()
-            )
-          ),
-        resultifyBotSDKRequestError
-      );
+    return await resolveRoomReferenceSafe(this.client, roomReference);
   }
 
   public async joinRoom(
