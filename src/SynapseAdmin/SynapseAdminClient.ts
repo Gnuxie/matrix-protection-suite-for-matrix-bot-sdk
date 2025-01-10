@@ -29,10 +29,12 @@ import {
   ActionException,
   ActionExceptionKind,
   ActionResult,
+  EDStatic,
   Ok,
   SynapseAdminDeleteRoomRequest,
   SynapseAdminGetUserAdminResponse,
   SynapseAdminPostUserDeactivateRequest,
+  SynapseReport,
   Value,
   isError,
 } from 'matrix-protection-suite';
@@ -41,6 +43,15 @@ import {
   StringRoomID,
   StringUserID,
 } from '@the-draupnir-project/matrix-basic-types';
+import { Type } from '@sinclair/typebox';
+import { resultifyBotSDKRequestError } from '../Client/BotSDKBaseClient';
+
+const ReportPollResponse = Type.Object({
+  event_reports: Type.Array(SynapseReport),
+  next_token: Type.Optional(Type.Union([Type.Integer(), Type.Null()])),
+  total: Type.Optional(Type.Union([Type.Integer(), Type.Null()])),
+});
+type ReportPollResponse = EDStatic<typeof ReportPollResponse>;
 
 export class SynapseAdminClient {
   constructor(
@@ -143,5 +154,27 @@ export class SynapseAdminClient {
             }
           )
       );
+  }
+
+  public async getAbuseReports({
+    from,
+    direction,
+    limit,
+  }: { from?: number; direction?: 'f' | 'b'; limit?: number } = {}): Promise<
+    ActionResult<ReportPollResponse>
+  > {
+    const endpoint = '/_synapse/admin/v1/event_reports';
+    const queryParams = {
+      ...(from ? { from } : {}),
+      ...(direction ? { dir: direction } : {}),
+      ...(limit ? { limit } : {}),
+    };
+    const response = await this.client
+      .doRequest('GET', endpoint, queryParams)
+      .then((value) => Ok(value), resultifyBotSDKRequestError);
+    if (isError(response)) {
+      return response;
+    }
+    return Value.Decode(ReportPollResponse, response.ok);
   }
 }
