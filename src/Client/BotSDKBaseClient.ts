@@ -169,6 +169,25 @@ export class BotSDKBaseClient
     return await resolveRoomReferenceSafe(this.client, roomReference);
   }
 
+  public async inviteUser(
+    room: MatrixRoomID | StringRoomID,
+    userID: StringUserID,
+    reason?: string
+  ): Promise<ActionResult<void>> {
+    const roomID = room instanceof MatrixRoomID ? room.toRoomIDOrAlias() : room;
+    return await this.client
+      .doRequest(
+        'POST',
+        `/_matrix/client/v3/rooms/${encodeURIComponent(roomID)}/invite`,
+        null,
+        {
+          user_id: userID,
+          ...(reason ? { reason } : {}),
+        }
+      )
+      .then((_) => Ok(undefined), resultifyBotSDKRequestError);
+  }
+
   public async joinRoom(
     room: MatrixRoomReference | StringRoomID | StringRoomAlias,
     rawOptions?: { alwaysCallJoin?: boolean }
