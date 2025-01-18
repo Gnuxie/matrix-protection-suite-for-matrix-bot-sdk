@@ -281,11 +281,10 @@ export class BotSDKBaseClient
   }
   public async unbanUser(
     room: StringRoomID | MatrixRoomID,
-    userID: StringUserID,
-    reason?: string
+    userID: StringUserID
   ): Promise<ActionResult<void>> {
     return await this.client
-      .banUser(userID, toRoomID(room), reason)
+      .unbanUser(userID, toRoomID(room))
       .then((_) => Ok(undefined), resultifyBotSDKRequestError);
   }
   public async sendStateEvent(
