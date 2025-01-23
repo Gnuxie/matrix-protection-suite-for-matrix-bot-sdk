@@ -12,7 +12,6 @@ import {
   EventDecoder,
   InternedInstanceFactory,
   Logger,
-  MultipleErrors,
   Ok,
   PolicyRoomManager,
   PolicyRoomRevisionIssuer,
@@ -22,6 +21,7 @@ import {
   RoomMembershipManager,
   RoomMembershipRevisionIssuer,
   RoomStateBackingStore,
+  RoomStateGetter,
   RoomStateManager,
   RoomStateMembershipRevisionIssuer,
   RoomStatePolicyRoomRevisionIssuer,
@@ -34,7 +34,6 @@ import {
   isOk,
 } from 'matrix-protection-suite';
 import { ClientForUserID } from './ClientManagement';
-import { MatrixSendClient } from '../MatrixEmitter';
 import { BotSDKRoomMembershipManager } from '../StateTracking/RoomMembershipManager';
 import { BotSDKPolicyRoomManager } from '../PolicyList/PolicyListManager';
 import { Redaction } from 'matrix-protection-suite/dist/MatrixTypes/Redaction';
@@ -54,6 +53,11 @@ export class RoomStateManagerFactory {
     RoomStateRevisionIssuer,
     [MatrixRoomID]
   > = new InternedInstanceFactory(async (_roomID, room) => {
+    const roomStateGetterResult =
+      await this.getRoomStateGetterForRevisionIssuer(room);
+    if (isError(roomStateGetterResult)) {
+      return roomStateGetterResult;
+    }
     const getInitialRoomState = async () => {
       if (this.roomStateBackingStore !== undefined) {
         const storeResult = await this.roomStateBackingStore.getRoomState(
@@ -70,7 +74,7 @@ export class RoomStateManagerFactory {
           );
         }
       }
-      return await this.getRoomStateForRevisionIssuer(room);
+      return await roomStateGetterResult.ok.getAllState(room);
     };
     const stateResult = await getInitialRoomState();
     // TODO: This entire class needs moving the MPS main via client capabilities.
@@ -80,7 +84,7 @@ export class RoomStateManagerFactory {
     }
     const issuer = new StandardRoomStateRevisionIssuer(
       room,
-      this.getRoomStateForRevisionIssuer,
+      roomStateGetterResult.ok,
       stateResult.ok
     );
     if (this.roomStateBackingStore) {
@@ -88,9 +92,6 @@ export class RoomStateManagerFactory {
     }
     return Ok(issuer);
   });
-
-  private readonly getRoomStateForRevisionIssuer =
-    this.getRoomStateForRevisionIssuerMethod.bind(this);
 
   private readonly policyRoomIssuers: InternedInstanceFactory<
     StringRoomID,
@@ -145,60 +146,9 @@ export class RoomStateManagerFactory {
     // nothing to do.
   }
 
-  public static async getRoomRoomState(
-    client: MatrixSendClient,
-    eventDecoder: EventDecoder,
+  private async getRoomStateGetterForRevisionIssuer(
     room: MatrixRoomID
-  ): Promise<ActionResult<StateEvent[]>> {
-    const decodeResults = await client
-      .getRoomState(room.toRoomIDOrAlias())
-      .then(
-        (events) =>
-          Ok(events.map((event) => eventDecoder.decodeStateEvent(event))),
-        (exception: unknown) =>
-          ActionError.Result(
-            `Could not fetch the room state for the room ${room.toPermalink()}.`,
-            { exception, exceptionKind: ActionExceptionKind.Unknown }
-          )
-      );
-    if (isError(decodeResults)) {
-      return decodeResults;
-    }
-    const errors: ActionError[] = [];
-    const events: StateEvent[] = [];
-    for (const result of decodeResults.ok) {
-      if (isError(result)) {
-        errors.push(result.error);
-      } else {
-        events.push(result.ok);
-      }
-    }
-    if (errors.length > 0) {
-      log.error(
-        `There were multiple errors while decoding state events for ${room.toPermalink()}`,
-        MultipleErrors.Result(
-          `Unable to decode state events in ${room.toPermalink()}`,
-          { errors }
-        )
-      );
-    }
-    return Ok(events);
-  }
-
-  public async getRoomState(
-    client: MatrixSendClient,
-    room: MatrixRoomID
-  ): Promise<ActionResult<StateEvent[]>> {
-    return await RoomStateManagerFactory.getRoomRoomState(
-      client,
-      this.eventDecoder,
-      room
-    );
-  }
-
-  private async getRoomStateForRevisionIssuerMethod(
-    room: MatrixRoomID
-  ): Promise<ActionResult<StateEvent[]>> {
+  ): Promise<ActionResult<RoomStateGetter>> {
     const managedClientsInRoom = this.clientsInRoomMap.getManagedUsersInRoom(
       room.toRoomIDOrAlias()
     );
@@ -209,10 +159,20 @@ export class RoomStateManagerFactory {
       );
     }
     const client = await this.clientProvider(chosenClientUserID);
-    return await RoomStateManagerFactory.getRoomRoomState(
-      client,
-      this.eventDecoder,
-      room
+    const clientRooms =
+      this.clientsInRoomMap.getClientRooms(chosenClientUserID);
+    if (clientRooms === undefined) {
+      throw new TypeError(`Cannot find clientRooms for ${chosenClientUserID}`);
+    }
+    return Ok(
+      new BotSDKClientPlatform(
+        new BotSDKBaseClient(
+          client,
+          chosenClientUserID,
+          clientRooms,
+          this.eventDecoder
+        )
+      ).toRoomStateGetter()
     );
   }
 
@@ -248,8 +208,7 @@ export class RoomStateManagerFactory {
   public async getRoomStateManager(
     clientUserID: StringUserID
   ): Promise<RoomStateManager> {
-    const client = await this.clientProvider(clientUserID);
-    return new BotSDKRoomStateManager(clientUserID, client, this);
+    return new BotSDKRoomStateManager(clientUserID, this);
   }
 
   public async getPolicyRoomRevisionIssuer(
@@ -347,7 +306,6 @@ export class RoomStateManagerFactory {
 class BotSDKRoomStateManager implements RoomStateManager {
   public constructor(
     public readonly clientUserID: StringUserID,
-    private readonly client: MatrixSendClient,
     private readonly factory: RoomStateManagerFactory
   ) {
     // nothing to do.
@@ -359,10 +317,5 @@ class BotSDKRoomStateManager implements RoomStateManager {
       room,
       this.clientUserID
     );
-  }
-  public async getRoomState(
-    room: MatrixRoomID
-  ): Promise<ActionResult<StateEvent[]>> {
-    return await this.factory.getRoomState(this.client, room);
   }
 }
