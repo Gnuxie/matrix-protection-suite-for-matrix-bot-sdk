@@ -29,6 +29,10 @@ import {
   RoomMessageSender,
   MessageContent,
   ClientRooms,
+  RoomStateGetter,
+  StateEvent,
+  Logger,
+  MultipleErrors,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { getRelationsForEvent } from './PaginationAPIs';
@@ -42,6 +46,9 @@ import {
   userServerName,
 } from '@the-draupnir-project/matrix-basic-types';
 import { resolveRoomReferenceSafe } from '../SafeMatrixClient';
+import { ResultError } from '@gnuxie/typescript-result';
+
+const log = new Logger('BotSDKBaseClient');
 
 const WeakError = Type.Object({
   message: Type.String(),
@@ -129,7 +136,8 @@ export class BotSDKBaseClient
     RoomJoiner,
     RoomKicker,
     RoomMessageSender,
-    RoomStateEventSender
+    RoomStateEventSender,
+    RoomStateGetter
 {
   public constructor(
     protected readonly client: MatrixSendClient,
@@ -278,6 +286,39 @@ export class BotSDKBaseClient
       options
     );
     return await doPagination(startingPage, options);
+  }
+  public async getAllState<T extends StateEvent>(
+    room: MatrixRoomID | StringRoomID
+  ): Promise<ActionResult<T[]>> {
+    const decodeResults = await this.client
+      .getRoomState(toRoomID(room))
+      .then(
+        (events) =>
+          Ok(events.map((event) => this.eventDecoder.decodeStateEvent(event))),
+        resultifyBotSDKRequestError
+      );
+    if (isError(decodeResults)) {
+      return decodeResults;
+    }
+    const errors: ResultError[] = [];
+    const events: StateEvent[] = [];
+    for (const result of decodeResults.ok) {
+      if (isError(result)) {
+        errors.push(result.error);
+      } else {
+        events.push(result.ok);
+      }
+    }
+    if (errors.length > 0) {
+      log.error(
+        `There were multiple errors while decoding state events for ${room.toString()}`,
+        MultipleErrors.Result(
+          `Unable to decode state events in ${room.toString()}`,
+          { errors }
+        )
+      );
+    }
+    return Ok(events as T[]);
   }
   public async unbanUser(
     room: StringRoomID | MatrixRoomID,
