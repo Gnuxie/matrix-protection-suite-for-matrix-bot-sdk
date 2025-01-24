@@ -44,13 +44,15 @@ import {
   MatrixRoomID,
   StringUserID,
 } from '@the-draupnir-project/matrix-basic-types';
+import { RoomStateRefresh } from './RoomStateRefresh';
 
 const log = new Logger('RoomStateManagerFactory');
 
 export class RoomStateManagerFactory {
+  private readonly roomStateRefresher = new RoomStateRefresh();
   private readonly roomStateIssuers: InternedInstanceFactory<
     StringRoomID,
-    RoomStateRevisionIssuer,
+    StandardRoomStateRevisionIssuer,
     [MatrixRoomID]
   > = new InternedInstanceFactory(async (_roomID, room) => {
     const roomStateGetterResult =
@@ -65,7 +67,7 @@ export class RoomStateManagerFactory {
         );
         if (isOk(storeResult)) {
           if (storeResult.ok !== undefined) {
-            return Ok(storeResult.ok);
+            return Ok({ state: storeResult.ok, isFromStore: true });
           }
         } else {
           log.error(
@@ -74,7 +76,13 @@ export class RoomStateManagerFactory {
           );
         }
       }
-      return await roomStateGetterResult.ok.getAllState(room);
+      const stateRequestResult = await roomStateGetterResult.ok.getAllState(
+        room
+      );
+      if (isError(stateRequestResult)) {
+        return stateRequestResult;
+      }
+      return Ok({ state: stateRequestResult.ok, isFromStore: false });
     };
     const stateResult = await getInitialRoomState();
     // TODO: This entire class needs moving the MPS main via client capabilities.
@@ -85,10 +93,14 @@ export class RoomStateManagerFactory {
     const issuer = new StandardRoomStateRevisionIssuer(
       room,
       roomStateGetterResult.ok,
-      stateResult.ok
+      stateResult.ok.state
     );
     if (this.roomStateBackingStore) {
       issuer.on('revision', this.roomStateBackingStore.revisionListener);
+    }
+    // Refresh the state if it was loaded from the store
+    if (stateResult.ok.isFromStore) {
+      this.roomStateRefresher.refreshState(issuer);
     }
     return Ok(issuer);
   });

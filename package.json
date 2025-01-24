@@ -68,7 +68,8 @@
     ]
   },
   "dependencies": {
-    "@gnuxie/typescript-result": "^1.0.0"
+    "@gnuxie/typescript-result": "^1.0.0",
+    "await-lock": "^2.2.2"
   },
   "peerDependencies": {
     "@sinclair/typebox": "0.34.13",
