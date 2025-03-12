@@ -44,7 +44,13 @@ import {
   StringUserID,
 } from '@the-draupnir-project/matrix-basic-types';
 import { Type } from '@sinclair/typebox';
-import { resultifyBotSDKRequestError } from '../Client/BotSDKBaseClient';
+import {
+  resultifyBotSDKRequestError,
+  resultifyBotSDKRequestErrorWith404AsUndefined,
+} from '../Client/BotSDKBaseClient';
+import { SynapseRoomShutdownV2RequestBody } from './ShutdownV2Endpoint';
+import { BlockStatusResponse } from './BlockStatusEndpoint';
+import { RoomDetailsResponse } from './RoomDetailsEndpoint';
 
 const ReportPollResponse = Type.Object({
   event_reports: Type.Array(SynapseReport),
@@ -176,5 +182,38 @@ export class SynapseAdminClient {
       return response;
     }
     return Value.Decode(ReportPollResponse, response.ok);
+  }
+
+  public async shutdownRoomV2(
+    roomID: StringRoomID,
+    options: SynapseRoomShutdownV2RequestBody
+  ): Promise<ActionResult<void>> {
+    const endpoint = `/_synapse/admin/v2/rooms/${encodeURIComponent(roomID)}`;
+    return await this.client
+      .doRequest('DELETE', endpoint, null, options)
+      .then(() => Ok(undefined), resultifyBotSDKRequestError);
+  }
+
+  public async getBlockStatus(
+    roomID: StringRoomID
+  ): Promise<ActionResult<BlockStatusResponse>> {
+    const endpoint = `/_synapse/admin/v1/rooms/${encodeURIComponent(
+      roomID
+    )}/block`;
+    return await this.client
+      .doRequest('GET', endpoint)
+      .then(
+        (value) => Value.Decode(BlockStatusResponse, value),
+        resultifyBotSDKRequestError
+      );
+  }
+
+  public async getRoomDetails(
+    roomID: StringRoomID
+  ): Promise<ActionResult<RoomDetailsResponse | undefined>> {
+    const endpoint = `/_synapse/admin/v1/rooms/${encodeURIComponent(roomID)}`;
+    return await this.client.doRequest('GET', endpoint).then((value) => {
+      return Value.Decode(RoomDetailsResponse, value);
+    }, resultifyBotSDKRequestErrorWith404AsUndefined);
   }
 }
