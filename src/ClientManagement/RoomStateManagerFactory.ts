@@ -26,9 +26,11 @@ import {
   RoomStateMembershipRevisionIssuer,
   RoomStatePolicyRoomRevisionIssuer,
   RoomStateRevisionIssuer,
+  SHA256HashStore,
   StandardPolicyRoomRevision,
   StandardRoomMembershipRevision,
   StandardRoomStateRevisionIssuer,
+  StandardSHA256HashReverser,
   StateEvent,
   isError,
   isOk,
@@ -117,13 +119,13 @@ export class RoomStateManagerFactory {
     if (isError(roomStateIssuer)) {
       return roomStateIssuer;
     }
-    return Ok(
-      new RoomStatePolicyRoomRevisionIssuer(
-        room,
-        StandardPolicyRoomRevision.blankRevision(room),
-        roomStateIssuer.ok
-      )
+    const issuer = new RoomStatePolicyRoomRevisionIssuer(
+      room,
+      StandardPolicyRoomRevision.blankRevision(room),
+      roomStateIssuer.ok
     );
+    this.sha256Reverser?.addPolicyRoomRevisionIssuer(issuer);
+    return Ok(issuer);
   });
 
   private readonly roomMembershipIssuers: InternedInstanceFactory<
@@ -149,11 +151,15 @@ export class RoomStateManagerFactory {
     );
   });
 
+  private readonly sha256Reverser = this.hashStore
+    ? new StandardSHA256HashReverser(this.hashStore)
+    : undefined;
   constructor(
     public readonly clientsInRoomMap: ClientsInRoomMap,
     private readonly clientProvider: ClientForUserID,
     private readonly eventDecoder: EventDecoder,
-    private readonly roomStateBackingStore?: RoomStateBackingStore
+    private readonly roomStateBackingStore: RoomStateBackingStore | undefined,
+    private readonly hashStore: SHA256HashStore | undefined
   ) {
     // nothing to do.
   }
