@@ -216,4 +216,20 @@ export class SynapseAdminClient {
       return Value.Decode(RoomDetailsResponse, value);
     }, resultifyBotSDKRequestErrorWith404AsUndefined);
   }
+
+  public async suspendUser(userID: StringUserID): Promise<ActionResult<void>> {
+    const endpoint = `/_synapse/admin/v1/suspend/${encodeURIComponent(userID)}`;
+    return await this.client
+      .doRequest('PUT', endpoint, null, { suspend: true })
+      .then(() => Ok(undefined), resultifyBotSDKRequestError);
+  }
+
+  public async unsuspendUser(
+    userID: StringUserID
+  ): Promise<ActionResult<void>> {
+    const endpoint = `/_synapse/admin/v1/suspend/${encodeURIComponent(userID)}`;
+    return await this.client
+      .doRequest('PUT', endpoint, null, { suspend: false })
+      .then(() => Ok(undefined), resultifyBotSDKRequestError);
+  }
 }
