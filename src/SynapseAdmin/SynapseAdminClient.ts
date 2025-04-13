@@ -51,6 +51,12 @@ import {
 import { SynapseRoomShutdownV2RequestBody } from './ShutdownV2Endpoint';
 import { BlockStatusResponse } from './BlockStatusEndpoint';
 import { RoomDetailsResponse } from './RoomDetailsEndpoint';
+import { UserDetailsResponse } from './UserDetailsEndpoint';
+import {
+  UserRedactionResponse,
+  UserRedactionStatusResponse,
+} from './UserRedactionEndpoint';
+import { ResultError } from '@gnuxie/typescript-result';
 
 const ReportPollResponse = Type.Object({
   event_reports: Type.Array(SynapseReport),
@@ -58,6 +64,16 @@ const ReportPollResponse = Type.Object({
   total: Type.Optional(Type.Union([Type.Integer(), Type.Null()])),
 });
 type ReportPollResponse = EDStatic<typeof ReportPollResponse>;
+
+/**
+ * An account restriction at the minimum stops the user from sending
+ * messages.
+ */
+export enum AccountRestriction {
+  Suspended = 'suspended',
+  Deactivated = 'deactivated',
+  ShadowBanned = 'shadow_banned',
+}
 
 export class SynapseAdminClient {
   constructor(
@@ -231,5 +247,94 @@ export class SynapseAdminClient {
     return await this.client
       .doRequest('PUT', endpoint, null, { suspend: false })
       .then(() => Ok(undefined), resultifyBotSDKRequestError);
+  }
+
+  public async getUserDetails(
+    userID: StringUserID
+  ): Promise<ActionResult<UserDetailsResponse | undefined>> {
+    const endpoint = `/_synapse/admin/v2/users/${encodeURIComponent(userID)}`;
+    return await this.client.doRequest('GET', endpoint).then((value) => {
+      return Value.Decode(UserDetailsResponse, value);
+    }, resultifyBotSDKRequestErrorWith404AsUndefined);
+  }
+
+  public async redactUser(
+    userID: StringUserID
+  ): Promise<ActionResult<UserRedactionResponse>> {
+    const endpoint = `/_synapse/admin/v1/user/${encodeURIComponent(
+      userID
+    )}/redact`;
+    return await this.client
+      .doRequest('PUT', endpoint, null, {})
+      .then((value) => {
+        return Value.Decode(UserRedactionResponse, value);
+      }, resultifyBotSDKRequestError);
+  }
+
+  public async getUserRedactionStatus(
+    redactionID: string
+  ): Promise<ActionResult<UserRedactionStatusResponse | undefined>> {
+    const endpoint = `/_synapse/admin/v1/user/redact_status/${encodeURIComponent(
+      redactionID
+    )}`;
+    return await this.client.doRequest('GET', endpoint).then((value) => {
+      return Value.Decode(UserRedactionStatusResponse, value);
+    }, resultifyBotSDKRequestErrorWith404AsUndefined);
+  }
+
+  public async shadowBanUser(
+    userID: StringUserID
+  ): Promise<ActionResult<void>> {
+    const endpoint = `/_synapse/admin/v1/users/${encodeURIComponent(
+      userID
+    )}/shadow_ban`;
+    return await this.client
+      .doRequest('POST', endpoint, null, {})
+      .then(() => Ok(undefined), resultifyBotSDKRequestError);
+  }
+
+  public async unshadowBanUser(
+    userID: StringUserID
+  ): Promise<ActionResult<void>> {
+    const endpoint = `/_synapse/admin/v1/users/${encodeURIComponent(
+      userID
+    )}/shadow_ban`;
+    return await this.client
+      .doRequest('DELETE', endpoint, null, {})
+      .then(() => Ok(undefined), resultifyBotSDKRequestError);
+  }
+
+  public async unrestrictUser(
+    userID: StringUserID
+  ): Promise<ActionResult<AccountRestriction>> {
+    const details = await this.getUserDetails(userID);
+    if (isError(details)) {
+      return details;
+    } else if (details.ok === undefined) {
+      return ResultError.Result(
+        `Synapse cannot find details for the user ${userID}`
+      );
+    } else if (details.ok.shadow_banned) {
+      const result = await this.unshadowBanUser(userID);
+      if (isError(result)) {
+        return result;
+      } else {
+        return Ok(AccountRestriction.ShadowBanned);
+      }
+    } else if (details.ok.suspended) {
+      const result = await this.unsuspendUser(userID);
+      if (isError(result)) {
+        return result;
+      } else {
+        return Ok(AccountRestriction.Suspended);
+      }
+    } else if (details.ok.locked) {
+      return ResultError.Result(`We don't support locking users yet`);
+    } else if (details.ok.deactivated) {
+      return ResultError.Result(`We can't reactivate users`);
+    } else {
+      return ResultError.Result(`
+        User is already unrestricted`);
+    }
   }
 }
