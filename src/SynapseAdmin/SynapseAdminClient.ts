@@ -265,7 +265,7 @@ export class SynapseAdminClient {
       userID
     )}/redact`;
     return await this.client
-      .doRequest('PUT', endpoint, null, {})
+      .doRequest('POST', endpoint, null, { rooms: [] })
       .then((value) => {
         return Value.Decode(UserRedactionResponse, value);
       }, resultifyBotSDKRequestError);
