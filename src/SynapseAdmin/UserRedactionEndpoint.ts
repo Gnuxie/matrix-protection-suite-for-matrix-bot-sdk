@@ -14,7 +14,7 @@ export const UserRedactionStatusResponse = Type.Object({
     [
       Type.Literal('scheduled'),
       Type.Literal('active'),
-      Type.Literal('completed'),
+      Type.Literal('complete'),
       Type.Literal('failed'),
     ],
     { description: 'Status of the redaction job.' }
