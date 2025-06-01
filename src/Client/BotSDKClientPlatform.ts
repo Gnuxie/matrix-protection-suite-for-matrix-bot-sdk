@@ -18,6 +18,7 @@ import {
   RoomUnbanner,
 } from 'matrix-protection-suite';
 import { BotSDKBaseClient } from './BotSDKBaseClient';
+import { RoomReactionSender } from 'matrix-protection-suite/dist/Client/RoomReactionSender';
 
 export class BotSDKClientPlatform implements ClientPlatform {
   constructor(private readonly allClient: BotSDKBaseClient) {
@@ -54,6 +55,9 @@ export class BotSDKClientPlatform implements ClientPlatform {
     return this.allClient;
   }
   toRoomUnbanner(): RoomUnbanner {
+    return this.allClient;
+  }
+  toRoomReactionSender(): RoomReactionSender {
     return this.allClient;
   }
   toRoomMessageSender(): RoomMessageSender {

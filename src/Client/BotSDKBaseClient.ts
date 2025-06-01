@@ -48,6 +48,7 @@ import {
 import { resolveRoomReferenceSafe } from '../SafeMatrixClient';
 import { ResultError } from '@gnuxie/typescript-result';
 import util from 'util';
+import { RoomReactionSender } from 'matrix-protection-suite/dist/Client/RoomReactionSender';
 
 const log = new Logger('BotSDKBaseClient');
 
@@ -153,6 +154,7 @@ export class BotSDKBaseClient
     RoomJoiner,
     RoomKicker,
     RoomMessageSender,
+    RoomReactionSender,
     RoomStateEventSender,
     RoomStateGetter
 {
@@ -175,6 +177,19 @@ export class BotSDKBaseClient
   ): Promise<ActionResult<StringEventID>> {
     return await this.client
       .sendMessage(roomID, content)
+      .then(
+        (eventID) => Ok(eventID as StringEventID),
+        resultifyBotSDKRequestError
+      );
+  }
+
+  public async sendReaction(
+    roomID: StringRoomID,
+    eventID: StringEventID,
+    key: string
+  ): Promise<ActionResult<StringEventID>> {
+    return await this.client.unstableApis
+      .addReactionToEvent(roomID, eventID, key)
       .then(
         (eventID) => Ok(eventID as StringEventID),
         resultifyBotSDKRequestError
