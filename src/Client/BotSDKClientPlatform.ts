@@ -19,6 +19,7 @@ import {
 } from 'matrix-protection-suite';
 import { BotSDKBaseClient } from './BotSDKBaseClient';
 import { RoomReactionSender } from 'matrix-protection-suite/dist/Client/RoomReactionSender';
+import { RoomEventGetter } from 'matrix-protection-suite/dist/Client/RoomEventGetter';
 
 export class BotSDKClientPlatform implements ClientPlatform {
   constructor(private readonly allClient: BotSDKBaseClient) {
@@ -31,6 +32,9 @@ export class BotSDKClientPlatform implements ClientPlatform {
     return this.allClient;
   }
   toRoomEventRelationsGetter(): RoomEventRelationsGetter {
+    return this.allClient;
+  }
+  toRoomEventGetter(): RoomEventGetter {
     return this.allClient;
   }
   toRoomKicker(): RoomKicker {
