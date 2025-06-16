@@ -56,7 +56,8 @@ import {
   UserRedactionResponse,
   UserRedactionStatusResponse,
 } from './UserRedactionEndpoint';
-import { ResultError } from '@gnuxie/typescript-result';
+import { Result, ResultError } from '@gnuxie/typescript-result';
+import { RoomListQueryParams, RoomListResponse } from './RoomListEndpoint';
 
 const ReportPollResponse = Type.Object({
   event_reports: Type.Array(SynapseReport),
@@ -198,6 +199,18 @@ export class SynapseAdminClient {
       return response;
     }
     return Value.Decode(ReportPollResponse, response.ok);
+  }
+
+  public async listRooms(
+    options: RoomListQueryParams
+  ): Promise<Result<RoomListResponse>> {
+    const endpoint = '/_synapse/admin/v1/rooms';
+    return await this.client
+      .doRequest('GET', endpoint, options)
+      .then(
+        (response) => Value.Decode(RoomListResponse, response),
+        resultifyBotSDKRequestError
+      );
   }
 
   public async shutdownRoomV2(
