@@ -97,6 +97,7 @@ export const RoomListRoom = Type.Object(
         [
           Type.Literal('public'),
           Type.Literal('knock'),
+          Type.Literal('knock_restricted'),
           Type.Literal('invite'),
           Type.Literal('private'),
           Type.Literal('restricted'),
