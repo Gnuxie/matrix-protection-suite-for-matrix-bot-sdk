@@ -4,10 +4,10 @@
 
 import { Type } from '@sinclair/typebox';
 import {
-  EDStatic,
-  StringRoomIDSchema,
-  StringUserIDSchema,
-} from 'matrix-protection-suite';
+  isStringUserID,
+  StringUserID,
+} from '@the-draupnir-project/matrix-basic-types';
+import { EDStatic, StringRoomIDSchema } from 'matrix-protection-suite';
 
 export interface RoomListQueryParams {
   from?: number; // Offset in the returned list, defaults to 0
@@ -33,6 +33,22 @@ export interface RoomListQueryParams {
   public_rooms?: boolean; // Optional flag to filter public rooms
   empty_rooms?: boolean; // Optional flag to filter empty rooms
 }
+
+// There is a bug in Synapse at the moment where the creator can be blank.
+// https://github.com/element-hq/synapse/issues/18563
+export const BrokenRoomCreatorTransform = Type.Transform(
+  Type.Union([Type.Null(), Type.String()])
+)
+  .Decode((value) => {
+    if (value === '' || value === null) {
+      return null;
+    } else if (isStringUserID(value)) {
+      return value;
+    } else {
+      throw new TypeError('Invalid creator user ID format.');
+    }
+  })
+  .Encode((value) => (value === null ? '' : StringUserID(value)));
 
 export type RoomListRoom = EDStatic<typeof RoomListRoom>;
 export const RoomListRoom = Type.Object(
@@ -61,7 +77,7 @@ export const RoomListRoom = Type.Object(
     version: Type.String({
       description: 'The version of the room as a string.',
     }),
-    creator: StringUserIDSchema,
+    creator: BrokenRoomCreatorTransform,
     encryption: Type.Optional(
       Type.Union([
         Type.String({
