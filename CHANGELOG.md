@@ -11,11 +11,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.3] - 2025-06-19
+
+### Changed
+
+- Consolidated room details and room list details schema into one.
+  And mark way more fields as nullable.
+
+## [3.6.2] - 2025-06-17
+
+### Fixed
+
+- `knock_restricted` missing from room list details join rules.
+
 ## [3.6.1] - 2025-06-17
 
 ### Fixed
 
-- Synapse admin room list no longer
+- Synapse admin room list no longer fails when creator is missing
+  https://github.com/element-hq/synapse/issues/18563
 
 ## [3.6.0]
 
