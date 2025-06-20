@@ -31,10 +31,7 @@ export const BrokenRoomCreatorTransform = Type.Transform(
 
 export type RoomDetailsResponse = EDStatic<typeof RoomDetailsResponse>;
 export const RoomDetailsResponse = Type.Object({
-  room_id: Type.Union(
-    [StringRoomIDSchema],
-    Type.String({ description: 'The ID of the room.' })
-  ),
+  room_id: StringRoomIDSchema,
   name: Type.Optional(
     Type.Union([Type.String(), Type.Null()], {
       description: 'The name of the room.',
@@ -79,20 +76,37 @@ export const RoomDetailsResponse = Type.Object({
       Type.Null(),
     ])
   ),
-  version: Type.String({ description: 'The version of the room as a string.' }),
+  version: Type.Optional(
+    Type.Union([
+      Type.String({ description: 'The version of the room as a string.' }),
+      Type.Null(),
+    ])
+  ),
   creator: Type.Union([BrokenRoomCreatorTransform], {
     description: 'The user_id of the room creator.',
   }),
-  encryption: Type.Union([Type.String(), Type.Null()], {
-    description:
-      'Algorithm of end-to-end encryption of messages. Null if encryption is not active.',
-  }),
-  federatable: Type.Boolean({
-    description: 'Whether users on other servers can join this room.',
-  }),
-  public: Type.Boolean({
-    description: 'Whether the room is visible in the room directory.',
-  }),
+  encryption: Type.Optional(
+    Type.Union([Type.String(), Type.Null()], {
+      description:
+        'Algorithm of end-to-end encryption of messages. Null if encryption is not active.',
+    })
+  ),
+  federatable: Type.Optional(
+    Type.Union([
+      Type.Boolean({
+        description: 'Whether users on other servers can join this room.',
+      }),
+      Type.Null(),
+    ])
+  ),
+  public: Type.Optional(
+    Type.Union([
+      Type.Boolean({
+        description: 'Whether the room is visible in the room directory.',
+      }),
+      Type.Null(),
+    ])
+  ),
   join_rules: Type.Optional(
     Type.Union(
       [
@@ -111,9 +125,11 @@ export const RoomDetailsResponse = Type.Object({
       }
     )
   ),
-  guest_access: Type.Union(
-    [Type.Literal('can_join'), Type.Literal('forbidden'), Type.Null()],
-    { description: 'Whether guests can join the room.' }
+  guest_access: Type.Optional(
+    Type.Union(
+      [Type.Literal('can_join'), Type.Literal('forbidden'), Type.Null()],
+      { description: 'Whether guests can join the room.' }
+    )
   ),
   history_visibility: Type.Optional(
     Type.Union(
@@ -136,11 +152,18 @@ export const RoomDetailsResponse = Type.Object({
       Type.Null(),
     ])
   ),
-  room_type: Type.Union([Type.String(), Type.Null()], {
-    description:
-      "The type of the room from the room's creation event, e.g., 'm.space'. Null if not defined.",
-  }),
-  forgotten: Type.Boolean({
-    description: 'Whether all local users have forgotten the room.',
-  }),
+  room_type: Type.Optional(
+    Type.Union([Type.String(), Type.Null()], {
+      description:
+        "The type of the room from the room's creation event, e.g., 'm.space'. Null if not defined.",
+    })
+  ),
+  forgotten: Type.Optional(
+    Type.Union([
+      Type.Boolean({
+        description: 'Whether all local users have forgotten the room.',
+      }),
+      Type.Null(),
+    ])
+  ),
 });
