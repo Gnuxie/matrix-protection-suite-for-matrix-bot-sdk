@@ -33,7 +33,7 @@ export class BotSDKAccountDataConfigBackend<
     // nothing to do.
   }
 
-  public async requestConfig(): Promise<
+  public async requestUnparsedConfig(): Promise<
     ActionResult<Record<string, unknown> | undefined>
   > {
     return await this.client
@@ -100,6 +100,7 @@ export class BotSDKMatrixAccountData<T> implements MatrixAccountData<T> {
   }
 }
 
+// FIXME: This is incorrect, it's supposed to wrap the standard thingy.
 export class BotSDKRoomStateConfigBackend<
   TEncodedShape extends Record<string, unknown> = Record<string, unknown>
 > implements PersistentConfigBackend<TEncodedShape>
@@ -112,7 +113,7 @@ export class BotSDKRoomStateConfigBackend<
   ) {
     // nothing to do.
   }
-  public async requestConfig(): Promise<
+  public async requestUnparsedConfig(): Promise<
     ActionResult<Record<string, unknown> | undefined>
   > {
     return await this.client
