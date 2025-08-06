@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: AFL-3.0
 
 import {
+  ClientCapabilitiesNegotiation,
   ClientPlatform,
   RoomBanner,
   RoomCreator,
@@ -25,6 +26,11 @@ export class BotSDKClientPlatform implements ClientPlatform {
   constructor(private readonly allClient: BotSDKBaseClient) {
     // nothing to do,
   }
+
+  toClientCapabilitiesNegotiation(): ClientCapabilitiesNegotiation {
+    return this.allClient;
+  }
+
   toRoomBanner(): RoomBanner {
     return this.allClient;
   }

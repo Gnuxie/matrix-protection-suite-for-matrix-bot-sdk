@@ -33,6 +33,8 @@ import {
   StateEvent,
   Logger,
   MultipleErrors,
+  ClientCapabilitiesNegotiation,
+  ClientCapabilitiesResponse,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { getRelationsForEvent } from './PaginationAPIs';
@@ -148,6 +150,7 @@ export function resultifyBotSDKRequestError(
 
 export class BotSDKBaseClient
   implements
+    ClientCapabilitiesNegotiation,
     RoomBanner,
     RoomCreator,
     RoomEventGetter,
@@ -171,6 +174,17 @@ export class BotSDKBaseClient
 
   protected preemptTimelineJoin(_roomID: StringRoomID): void {
     // nothing to do.
+  }
+
+  public async getClientCapabilities(): Promise<
+    ActionResult<ClientCapabilitiesResponse>
+  > {
+    return await this.client
+      .doRequest('GET', '/_matrix/client/v3/capabilities')
+      .then(
+        (value) => Value.Decode(ClientCapabilitiesResponse, value),
+        resultifyBotSDKRequestError
+      );
   }
 
   public async sendMessage<TContent extends MessageContent>(
