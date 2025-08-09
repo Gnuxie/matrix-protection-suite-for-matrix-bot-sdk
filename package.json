@@ -27,7 +27,7 @@
   "devDependencies": {
     "@commitlint/config-conventional": "^17.4.4",
     "@eslint/js": "^9.6.0",
-    "@sinclair/typebox": "0.34.13",
+    "@sinclair/typebox": "0.34.38",
     "@the-draupnir-project/matrix-basic-types": "1.4.0",
     "@types/crypto-js": "^4.1.2",
     "@types/eslint__js": "^8.42.3",
@@ -40,12 +40,12 @@
     "jest": "^29.4.3",
     "lint-staged": "^13.1.2",
     "matrix-bot-sdk": ">=0.6.4",
-    "matrix-protection-suite": "npm:@gnuxie/matrix-protection-suite@3.8.0",
+    "matrix-protection-suite": "npm:@gnuxie/matrix-protection-suite@3.9.0",
     "postcss": "^8.4.21",
     "prettier": "^2.8.4",
     "ts-jest": "^29.0.5",
     "tslib": "^2.5.0",
-    "typedoc": "^0.26.3",
+    "typedoc": "^0.28.0",
     "typescript": "^5.5.3",
     "typescript-eslint": "^7.15.0"
   },
