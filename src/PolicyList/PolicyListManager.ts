@@ -46,6 +46,7 @@ import {
   ClientsInRoomMap,
   StandardPolicyRoomEditor,
   ClientPlatform,
+  RoomVersionMirror,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
 import { RoomStateManagerFactory } from '../ClientManagement/RoomStateManagerFactory';
@@ -125,9 +126,10 @@ export class BotSDKPolicyRoomManager implements PolicyRoomManager {
         'Unable to get client capabilities for the policy room creator.'
       );
     }
-    const isV12OrAboveDefault =
-      parseInt(clientCapabilities.ok.capabilities['m.room_versions'].default) >=
-      12;
+    const isRoomVersionWithPrivilidgedCreators =
+      RoomVersionMirror.isVersionWithPrivilidgedCreators(
+        clientCapabilities.ok.capabilities['m.room_versions'].default
+      );
     const powerLevels: RoomCreateOptions['power_level_content_override'] = {
       ban: 50,
       events: {
@@ -143,7 +145,7 @@ export class BotSDKPolicyRoomManager implements PolicyRoomManager {
       redact: 50,
       state_default: 50,
       users: {
-        ...(isV12OrAboveDefault ? {} : { [creator.ok]: 100 }),
+        ...(isRoomVersionWithPrivilidgedCreators ? {} : { [creator.ok]: 100 }),
         ...invite.reduce((users, mxid) => ({ ...users, [mxid]: 50 }), {}),
       },
       users_default: 0,
