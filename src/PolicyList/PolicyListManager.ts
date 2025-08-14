@@ -54,7 +54,7 @@ import {
   MatrixRoomID,
   StringUserID,
   MatrixRoomReference,
-  MatrixUserID,
+  userServerName,
 } from '@the-draupnir-project/matrix-basic-types';
 
 export class BotSDKPolicyRoomManager implements PolicyRoomManager {
@@ -106,18 +106,28 @@ export class BotSDKPolicyRoomManager implements PolicyRoomManager {
     invite: string[],
     createRoomOptions: RoomCreateOptions
   ): Promise<ActionResult<MatrixRoomID>> {
-    const rawCreatorResult = await this.client.getUserId().then(
-      (user) => Ok(user),
+    const creator = await this.client.getUserId().then(
+      (user) => Ok(StringUserID(user)),
       (exception: unknown) =>
         ActionException.Result(
           'Could not create a list because we could not find the mxid of the list creator.',
           { exception, exceptionKind: ActionExceptionKind.Unknown }
         )
     );
-    if (isError(rawCreatorResult)) {
-      return rawCreatorResult;
+    if (isError(creator)) {
+      return creator;
     }
-    const creator = new MatrixUserID(rawCreatorResult.ok as StringUserID);
+    const clientCapabilities = await this.clientPlatform
+      .toClientCapabilitiesNegotiation()
+      .getClientCapabilities();
+    if (isError(clientCapabilities)) {
+      return clientCapabilities.elaborate(
+        'Unable to get client capabilities for the policy room creator.'
+      );
+    }
+    const isV12OrAboveDefault =
+      parseInt(clientCapabilities.ok.capabilities['m.room_versions'].default) >=
+      12;
     const powerLevels: RoomCreateOptions['power_level_content_override'] = {
       ban: 50,
       events: {
@@ -133,7 +143,7 @@ export class BotSDKPolicyRoomManager implements PolicyRoomManager {
       redact: 50,
       state_default: 50,
       users: {
-        [creator.toString()]: 100,
+        ...(isV12OrAboveDefault ? {} : { [creator.ok]: 100 }),
         ...invite.reduce((users, mxid) => ({ ...users, [mxid]: 50 }), {}),
       },
       users_default: 0,
@@ -167,7 +177,7 @@ export class BotSDKPolicyRoomManager implements PolicyRoomManager {
     }
     return await this.client.createRoom(finalRoomCreateOptions).then(
       (roomId) => {
-        const room = new MatrixRoomID(roomId, [creator.serverName]);
+        const room = new MatrixRoomID(roomId, [userServerName(creator.ok)]);
         this.joinPreempter.preemptTimelineJoin(
           this.clientUserID,
           room.toRoomIDOrAlias()
