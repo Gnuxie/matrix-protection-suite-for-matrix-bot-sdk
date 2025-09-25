@@ -14,18 +14,13 @@ import {
   RoomCreateOptions,
   RoomCreator,
   RoomEventRedacter,
-  RoomEventRelationsGetter,
   RoomJoiner,
   RoomKicker,
   RoomStateEventSender,
-  PaginationError,
   Value,
   isError,
   RoomEvent,
-  doPagination,
   EventDecoder,
-  RoomEventRelationsOptions,
-  StandardChunkPage,
   RoomMessageSender,
   MessageContent,
   ClientRooms,
@@ -35,9 +30,19 @@ import {
   MultipleErrors,
   ClientCapabilitiesNegotiation,
   ClientCapabilitiesResponse,
+  RoomMessages,
+  PaginationIterator,
+  RoomMessagesOptions,
+  RoomMessagesPaginator,
+  PaginationChunk,
+  RoomMessagesResponse,
+  StandardPaginationIterator,
+  RoomEventRelations,
+  RoomEventRelationsPaginator,
+  RoomEventRelationsOptions,
+  RoomEventRelationsResponse,
 } from 'matrix-protection-suite';
 import { MatrixSendClient } from '../MatrixEmitter';
-import { getRelationsForEvent } from './PaginationAPIs';
 import {
   MatrixRoomID,
   StringRoomID,
@@ -155,9 +160,10 @@ export class BotSDKBaseClient
     RoomCreator,
     RoomEventGetter,
     RoomEventRedacter,
-    RoomEventRelationsGetter,
+    RoomEventRelations,
     RoomJoiner,
     RoomKicker,
+    RoomMessages,
     RoomMessageSender,
     RoomReactionSender,
     RoomStateEventSender,
@@ -342,24 +348,72 @@ export class BotSDKBaseClient
         resultifyBotSDKRequestError
       );
   }
-  public async forEachRelation<ChunkItem = RoomEvent>(
+
+  public toRoomEventRelationsPaginator<TEvent extends RoomEvent = RoomEvent>(
+    roomID: StringRoomID,
+    eventID: StringEventID
+  ): RoomEventRelationsPaginator<TEvent> {
+    return Object.freeze({
+      client: this.client,
+      eventDecoder: this.eventDecoder,
+      async fetchPage(
+        ergonomicOptions: RoomEventRelationsOptions
+      ): Promise<ActionResult<PaginationChunk<TEvent>>> {
+        const options = {
+          ...ergonomicOptions,
+          dir: ergonomicOptions.direction === 'forwards' ? 'f' : 'b',
+        };
+        return this.client
+          .doRequest(
+            'GET',
+            `/_matrix/client/v1/rooms/${encodeURIComponent(
+              roomID
+            )}/relations/${encodeURIComponent(eventID)}`,
+            options
+          )
+          .then((response) => {
+            const firstSchemaPass = Value.Decode(
+              RoomEventRelationsResponse,
+              response
+            );
+            if (isError(firstSchemaPass)) {
+              return firstSchemaPass.elaborate(
+                'The response for /relations is severly malformed'
+              );
+            }
+            const parsedEvents: TEvent[] = [];
+            for (const event of firstSchemaPass.ok.chunk) {
+              const decodedEvent = this.eventDecoder.decodeEvent(event);
+              if (isError(decodedEvent)) {
+                return decodedEvent.elaborate(
+                  'Failed to decode an event in the /relations response'
+                );
+              }
+              parsedEvents.push(decodedEvent.ok as TEvent);
+            }
+            return Ok({
+              previousToken: firstSchemaPass.ok.prev_batch,
+              nextToken: firstSchemaPass.ok.next_batch,
+              chunk: parsedEvents,
+              hasNext: firstSchemaPass.ok.next_batch !== undefined,
+              hasPrevious: true,
+            } satisfies PaginationChunk<TEvent>);
+          });
+      },
+    });
+  }
+
+  toRoomEventRelationsIterator<TEvent extends RoomEvent = RoomEvent>(
     roomID: StringRoomID,
     eventID: StringEventID,
-    options: RoomEventRelationsOptions<ChunkItem>
-  ): Promise<ActionResult<void, PaginationError>> {
-    const startingPage = StandardChunkPage.createFirstPage<ChunkItem>(
-      async () =>
-        await getRelationsForEvent<ChunkItem>(
-          this.client,
-          this.eventDecoder,
-          roomID,
-          eventID,
-          options
-        ),
-      options
+    options: RoomEventRelationsOptions
+  ): PaginationIterator<TEvent> {
+    return new StandardPaginationIterator(
+      options,
+      this.toRoomEventRelationsPaginator(roomID, eventID)
     );
-    return await doPagination(startingPage, options);
   }
+
   public async getAllState<T extends StateEvent>(
     room: MatrixRoomID | StringRoomID
   ): Promise<ActionResult<T[]>> {
@@ -414,5 +468,68 @@ export class BotSDKBaseClient
         (eventID) => Ok(eventID as StringEventID),
         resultifyBotSDKRequestError
       );
+  }
+
+  toRoomMessagesPaginator<TEvent extends RoomEvent = RoomEvent>(
+    roomID: StringRoomID
+  ): RoomMessagesPaginator<TEvent> {
+    return Object.freeze({
+      client: this.client,
+      eventDecoder: this.eventDecoder,
+      async fetchPage(
+        ergonomicOptions: RoomMessagesOptions
+      ): Promise<ActionResult<PaginationChunk<TEvent>>> {
+        const options = {
+          ...ergonomicOptions,
+          filter: ergonomicOptions.filter
+            ? JSON.stringify(ergonomicOptions.filter)
+            : undefined,
+          dir: ergonomicOptions.direction === 'forwards' ? 'f' : 'b',
+        };
+        return this.client
+          .doRequest(
+            'GET',
+            `/_matrix/client/v3/rooms/${encodeURIComponent(roomID)}/messages`,
+            options
+          )
+          .then((response) => {
+            const firstSchemaPass = Value.Decode(
+              RoomMessagesResponse,
+              response
+            );
+            if (isError(firstSchemaPass)) {
+              return firstSchemaPass.elaborate(
+                'The response for /messages is severly malformed'
+              );
+            }
+            const parsedEvents: TEvent[] = [];
+            for (const event of firstSchemaPass.ok.chunk) {
+              const decodedEvent = this.eventDecoder.decodeEvent(event);
+              if (isError(decodedEvent)) {
+                return decodedEvent.elaborate(
+                  'Failed to decode an event in the /messages response'
+                );
+              }
+              parsedEvents.push(decodedEvent.ok as TEvent);
+            }
+            return Ok({
+              previousToken: firstSchemaPass.ok.start,
+              nextToken: firstSchemaPass.ok.end,
+              chunk: parsedEvents,
+              hasNext: firstSchemaPass.ok.end !== undefined,
+              hasPrevious: true,
+            } satisfies PaginationChunk<TEvent>);
+          });
+      },
+    });
+  }
+  toRoomMessagesIterator<TEvent extends RoomEvent = RoomEvent>(
+    roomID: StringRoomID,
+    options: RoomMessagesOptions
+  ): PaginationIterator<TEvent> {
+    return new StandardPaginationIterator(
+      options,
+      this.toRoomMessagesPaginator(roomID)
+    );
   }
 }
