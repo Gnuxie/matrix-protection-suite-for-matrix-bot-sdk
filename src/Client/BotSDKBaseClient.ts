@@ -481,9 +481,9 @@ export class BotSDKBaseClient
       ): Promise<ActionResult<PaginationChunk<TEvent>>> {
         const options = {
           ...ergonomicOptions,
-          filter: ergonomicOptions.filter
-            ? JSON.stringify(ergonomicOptions.filter)
-            : undefined,
+          ...(ergonomicOptions.filter
+            ? { filter: JSON.stringify(ergonomicOptions.filter) }
+            : {}),
           dir: ergonomicOptions.direction === 'forwards' ? 'f' : 'b',
         };
         return this.client
