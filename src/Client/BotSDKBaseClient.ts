@@ -398,7 +398,7 @@ export class BotSDKBaseClient
               hasNext: firstSchemaPass.ok.next_batch !== undefined,
               hasPrevious: true,
             } satisfies PaginationChunk<TEvent>);
-          });
+          }, resultifyBotSDKRequestError);
       },
     });
   }
@@ -519,7 +519,7 @@ export class BotSDKBaseClient
               hasNext: firstSchemaPass.ok.end !== undefined,
               hasPrevious: true,
             } satisfies PaginationChunk<TEvent>);
-          });
+          }, resultifyBotSDKRequestError);
       },
     });
   }
