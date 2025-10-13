@@ -17,6 +17,7 @@ import {
   PolicyRoomRevisionIssuer,
   PolicyRuleType,
   ResultError,
+  RoomCreateEvent,
   RoomEvent,
   RoomMembershipManager,
   RoomMembershipRevisionIssuer,
@@ -26,6 +27,7 @@ import {
   RoomStateMembershipRevisionIssuer,
   RoomStatePolicyRoomRevisionIssuer,
   RoomStateRevisionIssuer,
+  RoomVersionMirror,
   SHA256HashStore,
   StandardPolicyRoomRevision,
   StandardRoomMembershipRevision,
@@ -247,9 +249,28 @@ export class RoomStateManagerFactory {
     editor: StringUserID,
     ruleType: PolicyRuleType
   ): MatrixRoomID[] {
+    // This is kind of a workaround fix for https://github.com/the-draupnir-project/Draupnir/issues/946#issuecomment-3397228310.
+    const privilegedCreatorRooms = this.roomStateIssuers
+      .allInstances()
+      .filter((issuer) => {
+        const createEvent =
+          issuer.currentRevision.getStateEvent<RoomCreateEvent>(
+            'm.room.create',
+            ''
+          );
+        if (createEvent === undefined) {
+          return false;
+        }
+        return RoomVersionMirror.isUserAPrivilidgedCreator(editor, createEvent);
+      })
+      .map((issuer) => issuer.room.toRoomIDOrAlias());
     const editableRoomIDs = this.policyRoomIssuers
       .allInstances()
-      .filter((issuer) => issuer.currentRevision.isAbleToEdit(editor, ruleType))
+      .filter(
+        (issuer) =>
+          issuer.currentRevision.isAbleToEdit(editor, ruleType) ||
+          privilegedCreatorRooms.includes(issuer.room.toRoomIDOrAlias())
+      )
       .map((issuer) => issuer.currentRevision.room);
     return editableRoomIDs;
   }
