@@ -75,7 +75,7 @@
     "@sinclair/typebox": "0.34.13",
     "@the-draupnir-project/matrix-basic-types": "1.4.1",
     "matrix-bot-sdk": ">=0.6.4",
-    "matrix-protection-suite": "npm:@gnuxie/matrix-protection-suite@3.12.0"
+    "matrix-protection-suite": "npm:@gnuxie/matrix-protection-suite@3.13.0"
   },
   "publishConfig": {
     "@gnuxie:registry": "https://registry.npmjs.org"
